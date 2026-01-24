@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="la">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In Memoriam Papae Francisci</title>
+    <style>
+        body {
+            font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+            background-color: #f5f5f5;
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #703030;
+            font-size: 2.5em;
+            margin-bottom: 0.5em;
+        }
+        
+        h2 {
+            color: #595959;
+            font-style: italic;
+            font-weight: normal;
+            margin-bottom: 2em;
+        }
+        
+        .cross {
+            font-size: 3em;
+            color: #703030;
+            margin: 20px 0;
+        }
+        
+        .play-button {
+            display: inline-block;
+            background-color: #703030;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            cursor: pointer;
+            margin: 20px 0;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .play-button:hover {
+            background-color: #8a4040;
+        }
+        
+        .instructions {
+            font-style: italic;
+            margin: 20px 0;
+            color: #595959;
+        }
+        
+        .dates {
+            margin-top: 30px;
+            font-size: 1.1em;
+        }
+        
+        .language-selector {
+            margin: 25px 0 10px 0;
+        }
+        
+        .language-select {
+            padding: 8px 15px;
+            font-family: inherit;
+            font-size: 0.9em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            color: #555;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="6"><path d="M0,0l6,6l6,-6z" fill="%23777"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 10px;
+            padding-right: 30px;
+            cursor: pointer;
+        }
+        
+        .language-select:focus {
+            border-color: #703030;
+            outline: none;
+        }
+        
+        .language-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #595959;
+            font-style: italic;
+        }
+        
+        footer {
+            margin-top: 40px;
+            color: #777;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="cross">✝</div>
+        <h1>In Memoriam</h1>
+        <h2>Papae Francisci</h2>
+        
+        <div class="dates">
+            <p>MCMXXXVI – MMXXV</p>
+        </div>
+        
+        <div class="language-selector">
+            <span class="language-label">Elige linguam canticorum:</span>
+            <select id="languageSelect" class="language-select">
+                <option value="latin">Latina</option>
+                <option value="italian">Italica</option>
+                <option value="german">Germanica</option>
+                <option value="russian">Russica</option>
+                <option value="hebrew">Hebraica</option>
+                <option value="korean">Coreana</option>
+                <option value="arabic">Arabica</option>
+                <option value="chinese">Sinica</option>
+                <option value="portuguese">Lusitana</option>
+                <option value="swahili">Swahili</option>
+                <option value="hausa">Hausa</option>
+                <option value="lingala">Lingala</option>
+                <option value="spanish">Hispanica</option>
+                <option value="french">Gallica</option>
+                <option value="english">Anglica</option>
+            </select>
+        </div>
+        
+        <div class="instructions">
+            <p>Ad cantum audiendum, preme hoc signum:</p>
+        </div>
+        
+        <button id="playButton" class="play-button">Audi Canticum</button>
+        
+        <audio id="audioPlayer" loop>
+            <source id="audioSource" src="Franciscus-de-Caelo-LT.mp3" type="audio/mpeg">
+            Tuum navigatrum non sustinet elementum audio.
+        </audio>
+        
+        <footer>
+            <p>Requiescat in Pace</p>
+            <p>Lux perpetua luceat ei</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const playButton = document.getElementById('playButton');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const languageSelect = document.getElementById('languageSelect');
+            const audioSource = document.getElementById('audioSource');
+            let loadingTimeout;
+            
+            // Mappa delle lingue con i relativi file audio
+            const audioFiles = {
+                latin: "Franciscus-de-Caelo-LT.mp3",
+                italian: "Franciscus-de-Caelo-IT.mp3",
+                german: "Franciscus-de-Caelo-TE.mp3",
+                russian: "Franciscus-de-Caelo-RU.mp3",
+                hebrew: "Franciscus-de-Caelo-SR.mp3", // Assumo che SR sia per l'ebraico
+                korean: "Franciscus-de-Caelo-KR.mp3",
+                arabic: "Franciscus-de-Caelo-ARA.mp3",
+                chinese: "Franciscus-de-Caelo-CIN.mp3",
+                portuguese: "Franciscus-de-Caelo-POR.mp3",
+                swahili: "Franciscus-de-Caelo-SWAHILI.mp3",
+                hausa: "Franciscus-de-Caelo-HAUSA.mp3",
+                lingala: "Franciscus-de-Caelo-LINGALA.mp3",
+                spanish: "Franciscus-de-Caelo-SP.mp3",
+                french: "Franciscus-de-Caelo-FR.mp3",
+                english: "Franciscus-de-Caelo-UK.mp3"
+            };
+            
+            // Verifica se l'audio esiste (usato per debug)
+            function checkAudioExists(url, callback) {
+                fetch(url, { method: 'HEAD' })
+                .then(response => {
+                    callback(response.ok);
+                })
+                .catch(() => {
+                    callback(false);
+                });
+            }
+            
+            // Debug info
+            console.log("Audio element:", audioPlayer);
+            console.log("Audio source:", audioSource);
+            
+            // Verifica audio iniziale
+            checkAudioExists(audioSource.src, function(exists) {
+                console.log("Initial audio file exists:", exists);
+            });
+            
+            // Semplifichiamo drasticamente la logica di riproduzione
+            playButton.addEventListener('click', function() {
+                console.log("Button clicked, current state:", audioPlayer.paused ? "paused" : "playing");
+                
+                if (audioPlayer.paused) {
+                    // Verifica se l'audio esiste prima di riprodurlo
+                    checkAudioExists(audioSource.src, function(exists) {
+                        console.log("Audio file exists:", exists);
+                        
+                        if (!exists) {
+                            console.log("File doesn't exist or can't be accessed");
+                            alert("Il file audio non può essere caricato. Verificare che tutti i file siano nella cartella corretta.");
+                            return;
+                        }
+                        
+                        // Tentativo di riproduzione diretto
+                        audioPlayer.play();
+                        console.log("Play requested");
+                        
+                        // Forza l'aggiornamento del testo del pulsante
+                        setTimeout(function() {
+                            if (!audioPlayer.paused) {
+                                playButton.textContent = 'Pausa Canticum';
+                                console.log("Button text updated to Pause");
+                            } else {
+                                console.log("Audio still paused after play request");
+                            }
+                        }, 100);
+                    });
+                } else {
+                    audioPlayer.pause();
+                    playButton.textContent = 'Audi Canticum';
+                    console.log("Pause requested, button text updated");
+                }
+            });
+            
+            // Quando l'audio inizia a suonare, aggiorna il pulsante
+            audioPlayer.addEventListener('play', function() {
+                playButton.textContent = 'Pausa Canticum';
+                console.log("Play event fired");
+            });
+            
+            // Quando l'audio viene messo in pausa, aggiorna il pulsante
+            audioPlayer.addEventListener('pause', function() {
+                if (playButton.textContent !== 'Onerando...') {
+                    playButton.textContent = 'Audi Canticum';
+                }
+                console.log("Pause event fired");
+            });
+            
+            // Gestione del cambio lingua semplificata
+            languageSelect.addEventListener('change', function() {
+                const selectedLanguage = this.value;
+                console.log("Language changed to:", selectedLanguage);
+                
+                // Ferma la riproduzione corrente
+                audioPlayer.pause();
+                
+                // Mostra stato di caricamento
+                playButton.textContent = 'Onerando...';
+                
+                // Imposta la nuova fonte audio
+                audioSource.src = audioFiles[selectedLanguage];
+                console.log("New audio source:", audioSource.src);
+                
+                // Ricarica l'elemento audio
+                audioPlayer.load();
+                
+                // Ripristina il pulsante dopo un breve ritardo
+                setTimeout(function() {
+                    playButton.textContent = 'Audi Canticum';
+                }, 1000);
+                
+                // Verifica se il nuovo file esiste
+                checkAudioExists(audioFiles[selectedLanguage], function(exists) {
+                    console.log("New audio file exists:", exists);
+                    if (!exists) {
+                        console.log("New file doesn't exist or can't be accessed");
+                    }
+                });
+            });
+            
+            // Segnala errori audio in modo più chiaro
+            audioPlayer.addEventListener('error', function(e) {
+                console.error("Audio error:", e, audioPlayer.error);
+                alert("Si è verificato un errore con il file audio. Assicurarsi che tutti i file audio siano presenti nella cartella.");
+                playButton.textContent = 'Audi Canticum';
+            });
+        });
+    </script>
+<script src="https://cdn.counter.dev/script.js" data-id="99356092-0a36-47fb-acba-e7b5c99ca1b3" data-utcoffset="2"></script>
+</body>
+</html>
