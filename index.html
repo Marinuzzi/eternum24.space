@@ -16,86 +16,26 @@
 
         body {
             font-family: 'Cormorant Garamond', 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
-            background: #0a0505;
+            background: linear-gradient(180deg, #0a0505 0%, #1a0f0f 50%, #0a0505 100%);
             color: #e8d5b7;
             text-align: center;
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(184, 134, 11, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(139, 69, 19, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
-            background-size: 100% 100%;
-            animation: backgroundPulse 15s ease-in-out infinite;
         }
 
-        @keyframes backgroundPulse {
-            0%, 100% { background-position: 0% 0%, 100% 100%, 50% 50%; }
-            50% { background-position: 10% 10%, 90% 90%, 60% 40%; }
-        }
-
-        /* Stelle animate */
-        .stars {
+        body::before {
+            content: '';
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            background: 
+                radial-gradient(ellipse at top, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom, rgba(139, 69, 19, 0.05) 0%, transparent 50%);
             pointer-events: none;
             z-index: 0;
-        }
-
-        .star {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: #d4af37;
-            border-radius: 50%;
-            animation: twinkle 3s ease-in-out infinite;
-            box-shadow: 0 0 6px rgba(212, 175, 55, 0.8);
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.5); }
-        }
-
-        /* Particelle di luce divine */
-        .divine-light {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .light-particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: radial-gradient(circle, rgba(212, 175, 55, 0.9) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: float 20s linear infinite;
-            box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) translateX(0) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100px) translateX(100px) rotate(360deg);
-                opacity: 0;
-            }
         }
 
         .container {
@@ -107,14 +47,16 @@
         }
 
         .header {
-            margin-bottom: 60px;
-            animation: fadeInDown 2s ease-out;
+            margin-bottom: 80px;
+            padding: 60px 20px 40px;
+            position: relative;
+            animation: fadeInDown 1.5s ease-out;
         }
 
         @keyframes fadeInDown {
             from {
                 opacity: 0;
-                transform: translateY(-50px);
+                transform: translateY(-30px);
             }
             to {
                 opacity: 1;
@@ -122,63 +64,60 @@
             }
         }
 
-        .cross {
-            font-size: 5em;
-            color: #d4af37;
-            margin: 30px 0;
-            text-shadow: 
-                0 0 20px rgba(212, 175, 55, 0.8),
-                0 0 40px rgba(212, 175, 55, 0.6),
-                0 0 60px rgba(212, 175, 55, 0.4);
-            animation: crossGlow 4s ease-in-out infinite;
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
         }
 
-        @keyframes crossGlow {
-            0%, 100% {
-                text-shadow: 
-                    0 0 20px rgba(212, 175, 55, 0.8),
-                    0 0 40px rgba(212, 175, 55, 0.6),
-                    0 0 60px rgba(212, 175, 55, 0.4);
-            }
-            50% {
-                text-shadow: 
-                    0 0 30px rgba(212, 175, 55, 1),
-                    0 0 60px rgba(212, 175, 55, 0.8),
-                    0 0 90px rgba(212, 175, 55, 0.6);
-            }
+        .cross {
+            font-size: 4.5em;
+            color: #d4af37;
+            margin: 20px 0 30px;
+            text-shadow: 
+                0 0 15px rgba(212, 175, 55, 0.6),
+                0 0 30px rgba(212, 175, 55, 0.4);
+            line-height: 1;
         }
 
         h1 {
             font-family: 'Cinzel', serif;
             color: #d4af37;
-            font-size: 4em;
-            margin-bottom: 0.3em;
+            font-size: 3.5em;
+            margin-bottom: 15px;
             text-shadow: 
-                3px 3px 6px rgba(0, 0, 0, 0.8),
-                0 0 30px rgba(212, 175, 55, 0.5);
-            letter-spacing: 5px;
+                2px 2px 4px rgba(0, 0, 0, 0.9),
+                0 0 20px rgba(212, 175, 55, 0.4);
+            letter-spacing: 6px;
             font-weight: 700;
+            line-height: 1.2;
         }
 
         h2 {
             color: #c9a961;
             font-style: italic;
             font-weight: 400;
-            font-size: 2.2em;
-            margin-bottom: 1em;
+            font-size: 2em;
+            margin-bottom: 30px;
             text-shadow: 
-                2px 2px 4px rgba(0, 0, 0, 0.7),
-                0 0 20px rgba(201, 169, 97, 0.4);
-            letter-spacing: 2px;
+                1px 1px 3px rgba(0, 0, 0, 0.8),
+                0 0 15px rgba(201, 169, 97, 0.3);
+            letter-spacing: 3px;
         }
 
         .dates {
-            margin: 40px 0;
-            font-size: 1.5em;
+            margin: 30px 0 0;
+            font-size: 1.4em;
             color: #b8966b;
-            letter-spacing: 4px;
-            font-weight: 600;
-            text-shadow: 0 0 15px rgba(184, 150, 107, 0.5);
+            letter-spacing: 5px;
+            font-weight: 400;
+            text-shadow: 0 0 10px rgba(184, 150, 107, 0.4);
+            font-variant-numeric: oldstyle-nums;
         }
 
         .language-section {
@@ -433,9 +372,6 @@
     </style>
 </head>
 <body>
-    <div class="stars" id="stars"></div>
-    <div class="divine-light" id="divineLight"></div>
-
     <div class="container">
         <div class="header">
             <div class="cross">✝</div>
@@ -469,29 +405,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Crea stelle
-            const starsContainer = document.getElementById('stars');
-            for (let i = 0; i < 80; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                star.style.left = Math.random() * 100 + '%';
-                star.style.top = Math.random() * 100 + '%';
-                star.style.animationDelay = Math.random() * 3 + 's';
-                star.style.animationDuration = (Math.random() * 2 + 2) + 's';
-                starsContainer.appendChild(star);
-            }
-
-            // Crea particelle di luce divine
-            const lightContainer = document.getElementById('divineLight');
-            for (let i = 0; i < 25; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'light-particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 20 + 's';
-                particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
-                lightContainer.appendChild(particle);
-            }
-
             const playButton = document.getElementById('playButton');
             const audioPlayer = document.getElementById('audioPlayer');
             const audioSource = document.getElementById('audioSource');
