@@ -381,6 +381,185 @@ ssh fra@167.235.23.19 "cd /var/www/html/eternum24/audio && id3v2 --delete-all nu
 
 ---
 
+## EXTRA
+
+### Easter Eggs Implementati
+
+Il sito contiene due easter egg nascosti:
+
+| Easter Egg | Come Attivarlo | Messaggio |
+|------------|----------------|-----------|
+| **Hawaii** | Clicca sulle isole Hawaii (Pacifico) | "Fecit Joannes Fyrmell ©" |
+| **Stella Cadente** | Clicca su una stella cadente che passa | "✨ Opus Joannis Fyrmell ✨" |
+
+Le stelle cadenti:
+- Appaiono ogni ~4 secondi (24% probabilità)
+- Hanno traiettoria curva
+- Area cliccabile 30x30px (per facilitare il click)
+
+---
+
+### Effetti Visivi Implementati
+
+| Effetto | Descrizione |
+|---------|-------------|
+| **Starfield** | 1500 stelle che ruotano lentamente |
+| **Atmospheric Glow** | Alone blu attorno al globo |
+| **Pulsating Markers** | Marcatori lingua che pulsano |
+| **Shooting Stars** | Stelle cadenti occasionali con traiettoria curva |
+| **Distant Planets** | Marte/Venere appaiono raramente (~15% ogni 45s) |
+| **Light Ray** | Raggio di luce quando si clicca |
+| **Ascending Particles** | Particelle che salgono durante la riproduzione |
+| **Globe Fade In** | Animazione di entrata del globo |
+
+---
+
+### Modalità Disponibili
+
+| Modalità | Descrizione | Attivazione |
+|----------|-------------|-------------|
+| **Normale** | Globo con controlli visibili | Default |
+| **Fullscreen** | Solo globo e stelle, controlli minimi | Click icona ⛶ |
+| **Viaggio Continuo** | Musica continua, cambia lingua automaticamente | Toggle switch |
+
+**Fullscreen:**
+- Globo 15% più piccolo (più spazio per stelle)
+- Zoom in al click, zoom out dopo 3 secondi
+- ESC o X per uscire
+
+**Viaggio Continuo:**
+- Ripete ogni canzone 1-3 volte (random)
+- Poi seleziona lingua della regione visibile
+- Auto-disattiva se si mette in pausa
+
+---
+
+### Traduzioni UI Supportate
+
+L'interfaccia si adatta alla lingua del browser:
+
+| Codice | Lingua | Esempio |
+|--------|--------|---------|
+| la | Latino (default) | "Preme orbem ut canticum audias" |
+| it | Italiano | "Clicca sul mondo per ascoltare il canto" |
+| en | English | "Click the world to hear the song" |
+| es | Español | "Haz clic en el mundo para escuchar el canto" |
+| fr | Français | "Cliquez sur le monde pour écouter le chant" |
+| de | Deutsch | "Klicken Sie auf die Welt, um das Lied zu hören" |
+| pt | Português | "Clique no mundo para ouvir o canto" |
+| ru | Русский | "Нажмите на мир, чтобы услышать песню" |
+| ar | العربية | "انقر على العالم للاستماع إلى الأغنية" |
+| he | עברית | "לחץ על העולם כדי לשמוע את השיר" |
+| zh | 中文 | "点击世界聆听歌曲" |
+| ko | 한국어 | "세계를 클릭하여 노래를 들으세요" |
+| sw | Kiswahili | "Bofya ulimwengu kusikiliza wimbo" |
+| ha | Hausa | "Danna duniya don sauraron waƙa" |
+| ln | Lingála | "Finá mokili mpo na koyoka loyembo" |
+
+---
+
+### Zone Linguistiche sul Globo
+
+| Lingua | Zona Geografica | Coordinate |
+|--------|-----------------|------------|
+| Latino | Roma/Vaticano | 41-43°N, 11-13°E |
+| Italiano | Italia (escluso Vaticano) | 36-47°N, 6-19°E |
+| Spagnolo | Spagna + America Latina | Multiple zones |
+| Portoghese | Portogallo + Brasile | Multiple zones |
+| Francese | Francia | 42-51.5°N, -5-8°E |
+| Inglese | UK, USA, Australia, NZ, SA, India | Multiple zones |
+| Tedesco | Germania | 47-55.5°N, 5-16°E |
+| Russo | Russia | 50-70°N, 30-180°E |
+| Arabo | MENA | 12-36°N, -10-60°E |
+| Ebraico | Israele | 29-33.5°N, 34-36.5°E |
+| Cinese | Cina | 18-53°N, 73-135°E |
+| Coreano | Corea | 33-39.5°N, 124-131°E |
+| Swahili | Africa Est | -11-5°N, 28-45°E |
+| Hausa | Sahel Ovest | 9-20°N, -5-15°E |
+| Lingala | Congo Basin | -6-4°N, 12-25°E |
+
+---
+
+### Performance
+
+| Metrica | Target | Implementazione |
+|---------|--------|-----------------|
+| FPS | 60 | requestAnimationFrame, ottimizzazioni Three.js |
+| First Paint | <2s | CDN Vercel, lazy loading |
+| Audio Start | <500ms | Preload on hover (futuro) |
+| Memory | <100MB | Texture compression, geometry reuse |
+
+---
+
+### Tecnologie Utilizzate
+
+**Frontend:**
+- Three.js (WebGL 3D)
+- Vanilla JavaScript (no framework)
+- CSS3 animations
+- HTML5 Audio API
+
+**Backend:**
+- Python FastAPI
+- Uvicorn ASGI server
+- Nginx reverse proxy
+
+**Hosting:**
+- Vercel (frontend)
+- Hetzner VPS (backend + audio)
+- Porkbun (DNS)
+- Let's Encrypt (SSL)
+
+---
+
+### Costi Operativi
+
+| Servizio | Costo | Note |
+|----------|-------|------|
+| Vercel | €0 | Free tier sufficiente |
+| Hetzner | ~€5/mese | Già pagato per altri servizi |
+| Porkbun | ~€10/anno | Dominio |
+| Let's Encrypt | €0 | SSL gratuito |
+| **Totale** | **~€5/mese** | Marginale su infra esistente |
+
+---
+
+### Licenze e Copyright
+
+```
+Musica: © John Fyrmell 2025
+Sito web: © John Fyrmell 2025-2026
+Creato con: Suno AI (generazione musicale)
+
+In Memoriam Papae Francisci
+MCMXXXVI – MMXXV
+```
+
+---
+
+### Troubleshooting
+
+| Problema | Causa | Soluzione |
+|----------|-------|-----------|
+| Overlay "Sospeso" appare | API non raggiungibile o SITE_ENABLED=False | Verifica `curl https://api.eternum24.space/api/ping` |
+| Audio non parte | CORS error | Controlla browser console, verifica origins in main.py |
+| 404 su /api/ping | Nginx non configurato | Verifica `/etc/nginx/sites-enabled/eternum24-api` |
+| 502 Bad Gateway | FastAPI non running | `sudo systemctl status eternum24` |
+| Certificato scaduto | Let's Encrypt renewal failed | `sudo certbot renew` |
+
+---
+
+### Checklist Manutenzione Mensile
+
+- [ ] Verificare `curl https://api.eternum24.space/api/ping`
+- [ ] Controllare spazio disco: `df -h`
+- [ ] Verificare logs errori: `sudo journalctl -u eternum24 --since "1 month ago" | grep -i error`
+- [ ] Testare kill switch (attiva/disattiva)
+- [ ] Verificare certificato SSL: `echo | openssl s_client -connect api.eternum24.space:443 2>/dev/null | openssl x509 -noout -dates`
+- [ ] Backup audio files (se modificati)
+
+---
+
 ## Contatti Emergenza
 
 - **Email:** johnfyrmell@gmail.com
@@ -390,3 +569,4 @@ ssh fra@167.235.23.19 "cd /var/www/html/eternum24/audio && id3v2 --delete-all nu
 ---
 
 *Documentazione aggiornata: Gennaio 2026*
+*Versione: 1.0*
