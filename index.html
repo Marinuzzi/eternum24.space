@@ -1246,6 +1246,8 @@
             }
         });
 
+        let savedCameraDistance = null;
+
         function enterFullscreen() {
             if (isFullscreen) return;
             isFullscreen = true;
@@ -1266,6 +1268,11 @@
             // Update language display
             const lang = LANGUAGES[currentLang];
             fullscreenLanguageName.textContent = `${lang.latin} / ${lang.native}`;
+            
+            // Zoom out camera to show more space (15% smaller globe)
+            savedCameraDistance = camera.position.length();
+            const newDistance = savedCameraDistance * 1.25; // 25% further = ~15% smaller globe
+            camera.position.normalize().multiplyScalar(newDistance);
             
             // Resize renderer
             setTimeout(() => {
@@ -1296,6 +1303,12 @@
             fullscreenExitBtn.style.display = 'none';
             fullscreenLanguageInfo.classList.remove('active');
             fullscreenHint.classList.remove('active');
+            
+            // Restore camera distance
+            if (savedCameraDistance) {
+                camera.position.normalize().multiplyScalar(savedCameraDistance);
+                savedCameraDistance = null;
+            }
             
             // Resize renderer back
             setTimeout(() => {
