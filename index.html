@@ -1633,6 +1633,7 @@
             continuousRepeatCount = Math.floor(Math.random() * 3) + 1; // 1-3 repeats
             continuousCurrentRepeat = 0;
             updateContinuousStatus();
+            startContinuousWatchdog();
             
             // Start playing if not already
             if (audioPlayer.paused) {
@@ -1643,6 +1644,7 @@
         function stopContinuousMode() {
             isContinuousMode = false;
             continuousInfo.classList.remove('active');
+            stopContinuousWatchdog();
         }
 
         function updateContinuousStatus() {
@@ -1656,13 +1658,20 @@
         }
 
         async function handleContinuousModeEnd() {
+            if (!isContinuousMode) return;
+            
             continuousCurrentRepeat++;
             
             if (continuousCurrentRepeat < continuousRepeatCount) {
                 // Repeat the same song
                 updateContinuousStatus();
                 audioPlayer.currentTime = 0;
-                audioPlayer.play();
+                try {
+                    await audioPlayer.play();
+                } catch (e) {
+                    console.warn('Continuous mode: replay failed, retrying...', e);
+                    setTimeout(() => handleContinuousModeEnd(), 2000);
+                }
             } else {
                 // Move to next language based on visible region
                 const nextLang = getLanguageForVisibleRegion();
@@ -1673,8 +1682,32 @@
                 const langData = LANGUAGES[nextLang];
                 const markerPos = latLonToVector3(langData.marker.lat, langData.marker.lon, 1.57);
                 
-                await playLanguage(nextLang, markerPos);
-                updateContinuousStatus();
+                try {
+                    await playLanguage(nextLang, markerPos);
+                    updateContinuousStatus();
+                } catch (e) {
+                    console.warn('Continuous mode: next song failed, retrying...', e);
+                    setTimeout(() => handleContinuousModeEnd(), 2000);
+                }
+            }
+        }
+        
+        // Watchdog: ensure continuous mode keeps playing
+        let continuousWatchdog = null;
+        function startContinuousWatchdog() {
+            if (continuousWatchdog) clearInterval(continuousWatchdog);
+            continuousWatchdog = setInterval(() => {
+                if (isContinuousMode && audioPlayer.paused && !audioPlayer.seeking) {
+                    console.log('Watchdog: restarting continuous playback');
+                    handleContinuousModeEnd();
+                }
+            }, 5000); // Check every 5 seconds
+        }
+        
+        function stopContinuousWatchdog() {
+            if (continuousWatchdog) {
+                clearInterval(continuousWatchdog);
+                continuousWatchdog = null;
             }
         }
 
@@ -2192,6 +2225,26 @@
                 globeContainer.classList.remove('audio-playing');
                 playButton.classList.remove('playing');
                 playButton.textContent = '▶';
+            }
+        });
+        
+        // Audio error listener - recover in continuous mode
+        audioPlayer.addEventListener('error', (e) => {
+            console.warn('Audio error:', e);
+            if (isContinuousMode) {
+                console.log('Continuous mode: recovering from audio error...');
+                setTimeout(() => {
+                    // Try next language on error
+                    continuousCurrentRepeat = continuousRepeatCount; // Force next song
+                    handleContinuousModeEnd();
+                }, 2000);
+            }
+        });
+        
+        // Stalled/waiting listeners - recover if stuck
+        audioPlayer.addEventListener('stalled', () => {
+            if (isContinuousMode) {
+                console.log('Audio stalled, watchdog will recover');
             }
         });
 
