@@ -408,6 +408,173 @@
             }
         }
 
+        /* Fullscreen Mode */
+        .fullscreen-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background: rgba(10, 15, 25, 0.7);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: rgba(212, 175, 55, 0.7);
+            transform: scale(1.1);
+        }
+
+        .fullscreen-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: #d4af37;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .fullscreen-exit-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(10, 15, 25, 0.8);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .fullscreen-exit-btn:hover {
+            background: rgba(212, 175, 55, 0.3);
+            transform: scale(1.1);
+        }
+
+        .fullscreen-exit-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: none;
+            stroke: #d4af37;
+            stroke-width: 2;
+            stroke-linecap: round;
+        }
+
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #020408;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .fullscreen-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .fullscreen-globe-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .fullscreen-globe-container.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .fullscreen-globe-container canvas {
+            border-radius: 0 !important;
+        }
+
+        .fullscreen-language-info {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 12px 20px;
+            background: rgba(10, 15, 25, 0.85);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 12px;
+            z-index: 10001;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease 0.3s, visibility 0.5s ease 0.3s;
+            text-align: right;
+        }
+
+        .fullscreen-language-info.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .fullscreen-language-info .label {
+            font-size: 0.8em;
+            color: #93a0b8;
+            margin-bottom: 4px;
+        }
+
+        .fullscreen-language-info .language-name {
+            font-size: 1.2em;
+            color: #d4af37;
+            font-weight: 600;
+        }
+
+        .fullscreen-hint {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: rgba(10, 15, 25, 0.7);
+            border: 1px solid rgba(100, 120, 160, 0.3);
+            border-radius: 20px;
+            z-index: 10001;
+            color: #8a93a6;
+            font-size: 0.9em;
+            font-style: italic;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease 0.5s, visibility 0.5s ease 0.5s;
+            backdrop-filter: blur(5px);
+        }
+
+        .fullscreen-hint.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        body.fullscreen-mode {
+            overflow: hidden;
+        }
+
         footer {
             margin-top: 60px;
             color: #8a93a6;
@@ -468,6 +635,11 @@
             <div class="map-subtitle">Il globo ruota — trascinalo per esplorare — clicca su una zona linguistica</div>
             <div class="globe-container" id="globeContainer">
                 <div class="tooltip" id="tooltip"></div>
+                <button class="fullscreen-btn" id="fullscreenBtn" title="Modalità immersiva">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                    </svg>
+                </button>
             </div>
             <div class="selected-language-info">
                 <div class="label">Lingua selezionata</div>
@@ -495,6 +667,22 @@
             <p>Lux perpetua luceat ei</p>
         </footer>
     </div>
+
+    <!-- Fullscreen Mode Elements -->
+    <div class="fullscreen-overlay" id="fullscreenOverlay"></div>
+    <div class="fullscreen-globe-container" id="fullscreenGlobeContainer"></div>
+    <button class="fullscreen-exit-btn" id="fullscreenExitBtn" title="Esci (ESC)">
+        <svg viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+    </button>
+    <div class="fullscreen-language-info" id="fullscreenLanguageInfo">
+        <div class="label">Lingua selezionata</div>
+        <div class="language-name" id="fullscreenLanguageName">Latina / Latina</div>
+    </div>
+    <div class="fullscreen-hint" id="fullscreenHint">Clicca sul mondo per cambiare lingua • ESC per uscire</div>
+    <div class="tooltip" id="fullscreenTooltip" style="z-index: 10002;"></div>
     <script type="importmap">
         {
           "imports": {
@@ -572,6 +760,16 @@
         let ascendingParticles = [];
         let targetZoom = null;
         let isAudioPlaying = false;
+        let isFullscreen = false;
+
+        // Fullscreen elements
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fullscreenExitBtn = document.getElementById('fullscreenExitBtn');
+        const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+        const fullscreenGlobeContainer = document.getElementById('fullscreenGlobeContainer');
+        const fullscreenLanguageInfo = document.getElementById('fullscreenLanguageInfo');
+        const fullscreenLanguageName = document.getElementById('fullscreenLanguageName');
+        const fullscreenHint = document.getElementById('fullscreenHint');
 
         function normalizeLon(lon) {
             let out = lon;
@@ -822,6 +1020,81 @@
             }
         }, 4000);
 
+        function enterFullscreen() {
+            if (isFullscreen) return;
+            isFullscreen = true;
+            
+            document.body.classList.add('fullscreen-mode');
+            
+            // Move canvas to fullscreen container
+            const canvas = renderer.domElement;
+            fullscreenGlobeContainer.appendChild(canvas);
+            
+            // Activate overlays
+            fullscreenOverlay.classList.add('active');
+            fullscreenGlobeContainer.classList.add('active');
+            fullscreenExitBtn.style.display = 'flex';
+            fullscreenLanguageInfo.classList.add('active');
+            fullscreenHint.classList.add('active');
+            
+            // Update language display
+            const lang = LANGUAGES[currentLang];
+            fullscreenLanguageName.textContent = `${lang.latin} / ${lang.native}`;
+            
+            // Resize renderer
+            setTimeout(() => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }, 50);
+            
+            // Hide hint after 5 seconds
+            setTimeout(() => {
+                fullscreenHint.classList.remove('active');
+            }, 5000);
+        }
+
+        function exitFullscreen() {
+            if (!isFullscreen) return;
+            isFullscreen = false;
+            
+            document.body.classList.remove('fullscreen-mode');
+            
+            // Move canvas back to original container
+            const canvas = renderer.domElement;
+            globeContainer.appendChild(canvas);
+            
+            // Deactivate overlays
+            fullscreenOverlay.classList.remove('active');
+            fullscreenGlobeContainer.classList.remove('active');
+            fullscreenExitBtn.style.display = 'none';
+            fullscreenLanguageInfo.classList.remove('active');
+            fullscreenHint.classList.remove('active');
+            
+            // Resize renderer back
+            setTimeout(() => {
+                const w = globeContainer.clientWidth;
+                const h = globeContainer.clientHeight;
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+                renderer.setSize(w, h);
+            }, 50);
+        }
+
+        // Fullscreen button listeners
+        fullscreenBtn.addEventListener('click', enterFullscreen);
+        fullscreenExitBtn.addEventListener('click', exitFullscreen);
+        fullscreenOverlay.addEventListener('click', (e) => {
+            if (e.target === fullscreenOverlay) exitFullscreen();
+        });
+
+        // ESC key to exit
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isFullscreen) {
+                exitFullscreen();
+            }
+        });
+
         function initGlobe() {
             const width = globeContainer.clientWidth;
             const height = globeContainer.clientHeight;
@@ -925,15 +1198,22 @@
             const raycaster = new THREE.Raycaster();
             const mouse = new THREE.Vector2();
 
+            const fullscreenTooltip = document.getElementById('fullscreenTooltip');
+
             function onPointerMove(event) {
-                const rect = globeContainer.getBoundingClientRect();
+                const container = isFullscreen ? fullscreenGlobeContainer : globeContainer;
+                const activeTooltip = isFullscreen ? fullscreenTooltip : tooltip;
+                const rect = isFullscreen ? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight } : globeContainer.getBoundingClientRect();
+                
                 mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
                 mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObject(globe);
+                
                 if (intersects.length === 0) {
                     tooltip.classList.remove('visible');
-                    globeContainer.style.cursor = 'default';
+                    fullscreenTooltip.classList.remove('visible');
+                    container.style.cursor = 'default';
                     return;
                 }
 
@@ -943,19 +1223,20 @@
 
                 if (langKey) {
                     const lang = LANGUAGES[langKey];
-                    tooltip.textContent = `Click to play: ${lang.latin} / ${lang.native}`;
-                    tooltip.style.left = `${event.clientX - rect.left}px`;
-                    tooltip.style.top = `${event.clientY - rect.top}px`;
-                    tooltip.classList.add('visible');
-                    globeContainer.style.cursor = 'pointer';
+                    activeTooltip.textContent = `Click to play: ${lang.latin} / ${lang.native}`;
+                    activeTooltip.style.left = `${event.clientX - rect.left}px`;
+                    activeTooltip.style.top = `${event.clientY - rect.top}px`;
+                    activeTooltip.classList.add('visible');
+                    container.style.cursor = 'pointer';
                 } else {
-                    tooltip.classList.remove('visible');
-                    globeContainer.style.cursor = 'default';
+                    activeTooltip.classList.remove('visible');
+                    container.style.cursor = 'default';
                 }
             }
 
             function onClick(event) {
-                const rect = globeContainer.getBoundingClientRect();
+                const rect = isFullscreen ? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight } : globeContainer.getBoundingClientRect();
+                
                 mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
                 mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
                 raycaster.setFromCamera(mouse, camera);
@@ -967,8 +1248,10 @@
                 const langKey = getLanguageForLatLon(lat, lon);
                 if (!langKey) return;
 
-                // Light ray effect
-                triggerLightRay(event.clientX - rect.left, event.clientY - rect.top);
+                // Light ray effect (only in normal mode)
+                if (!isFullscreen) {
+                    triggerLightRay(event.clientX - rect.left, event.clientY - rect.top);
+                }
                 
                 // Smooth zoom towards clicked point
                 targetZoom = 3.4;
@@ -982,13 +1265,27 @@
                 globeContainer.style.cursor = 'default';
             });
             globeContainer.addEventListener('click', onClick);
+            
+            // Fullscreen container events
+            fullscreenGlobeContainer.addEventListener('mousemove', onPointerMove);
+            fullscreenGlobeContainer.addEventListener('mouseleave', () => {
+                fullscreenTooltip.classList.remove('visible');
+                fullscreenGlobeContainer.style.cursor = 'default';
+            });
+            fullscreenGlobeContainer.addEventListener('click', onClick);
 
             window.addEventListener('resize', () => {
-                const w = globeContainer.clientWidth;
-                const h = globeContainer.clientHeight;
-                camera.aspect = w / h;
-                camera.updateProjectionMatrix();
-                renderer.setSize(w, h);
+                if (isFullscreen) {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                } else {
+                    const w = globeContainer.clientWidth;
+                    const h = globeContainer.clientHeight;
+                    camera.aspect = w / h;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(w, h);
+                }
             });
 
             const clock = new THREE.Clock();
@@ -1079,6 +1376,7 @@
             const label = `${lang.latin} / ${lang.native}`;
             currentLanguageEl.textContent = label;
             selectedLanguageName.textContent = label;
+            fullscreenLanguageName.textContent = label;
         }
 
         function setActiveMarker(point) {
