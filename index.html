@@ -1320,7 +1320,7 @@
             const handleStarClick = (e) => {
                 e.stopPropagation();
                 e.preventDefault();
-                showEasterEgg('✨ Credit by John Fyrmell ✨');
+                showEasterEgg('✨ Opus Joannis Fyrmell ✨');
                 star.style.opacity = '0';
                 setTimeout(() => star.remove(), 100);
             };
@@ -1724,7 +1724,7 @@
                 
                 // Easter egg: Hawaii (lat 18-23, lon -160 to -154)
                 if (lat >= 18 && lat <= 24 && lon >= -162 && lon <= -152) {
-                    showEasterEgg('Done by John Fyrmell ©');
+                    showEasterEgg('Fecit Joannes Fyrmell ©');
                     return;
                 }
                 
