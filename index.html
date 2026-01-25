@@ -1776,14 +1776,45 @@
             }
         }
         
+        let lightningConnectionFailed = false;
+        let lightningConnectTimeout = null;
+        
+        function disableLightningToggle() {
+            lightningEnabled = false;
+            lightningToggle.checked = false;
+            lightningToggle.disabled = true;
+            const label = document.getElementById('lightningToggleLabel');
+            if (label) label.style.opacity = '0.4';
+        }
+        
+        function enableLightningToggle() {
+            lightningToggle.disabled = false;
+            const label = document.getElementById('lightningToggleLabel');
+            if (label) label.style.opacity = '1';
+        }
+        
         function connectLightningWebSocket() {
-            if (lightningWs) return;
+            if (lightningWs || lightningConnectionFailed) return;
             
             try {
                 // Blitzortung WebSocket for real-time lightning
                 lightningWs = new WebSocket('wss://ws1.blitzortung.org/');
                 
+                // Timeout: if no connection in 8 seconds, disable
+                lightningConnectTimeout = setTimeout(() => {
+                    if (lightningWs && lightningWs.readyState !== WebSocket.OPEN) {
+                        console.log('⚡ Lightning connection timeout');
+                        lightningConnectionFailed = true;
+                        disableLightningToggle();
+                        if (lightningWs) {
+                            lightningWs.close();
+                            lightningWs = null;
+                        }
+                    }
+                }, 8000);
+                
                 lightningWs.onopen = () => {
+                    clearTimeout(lightningConnectTimeout);
                     console.log('⚡ Lightning WebSocket connected');
                     // Subscribe to global lightning data
                     lightningWs.send(JSON.stringify({
@@ -1803,28 +1834,38 @@
                             }
                         }
                     } catch (e) {
-                        // Ignore parsing errors
+                        // Ignore parsing errors silently
                     }
                 };
                 
                 lightningWs.onclose = () => {
-                    console.log('⚡ Lightning WebSocket closed');
+                    clearTimeout(lightningConnectTimeout);
                     lightningWs = null;
-                    // Reconnect if still enabled
-                    if (lightningEnabled) {
+                    // Only reconnect if enabled and not permanently failed
+                    if (lightningEnabled && !lightningConnectionFailed) {
                         setTimeout(connectLightningWebSocket, 5000);
                     }
                 };
                 
-                lightningWs.onerror = (err) => {
-                    console.warn('Lightning WebSocket error:', err);
+                lightningWs.onerror = () => {
+                    clearTimeout(lightningConnectTimeout);
+                    // Connection error - disable toggle gracefully
+                    lightningConnectionFailed = true;
+                    disableLightningToggle();
+                    if (lightningWs) {
+                        lightningWs.close();
+                        lightningWs = null;
+                    }
                 };
             } catch (e) {
-                console.warn('Failed to connect lightning WebSocket:', e);
+                // Browser doesn't support WebSocket or blocked - disable gracefully
+                lightningConnectionFailed = true;
+                disableLightningToggle();
             }
         }
         
         function disconnectLightningWebSocket() {
+            clearTimeout(lightningConnectTimeout);
             if (lightningWs) {
                 lightningWs.close();
                 lightningWs = null;
@@ -1834,6 +1875,12 @@
         // Lightning toggle listener
         const lightningToggle = document.getElementById('lightningToggle');
         lightningToggle.addEventListener('change', () => {
+            if (lightningConnectionFailed) {
+                // Don't allow enabling if connection failed
+                lightningToggle.checked = false;
+                return;
+            }
+            
             lightningEnabled = lightningToggle.checked;
             if (lightningEnabled) {
                 connectLightningWebSocket();
@@ -1841,7 +1888,7 @@
                 disconnectLightningWebSocket();
                 // Clear existing flashes
                 lightningFlashes.forEach(f => {
-                    globe.remove(f.sprite);
+                    if (globe) globe.remove(f.sprite);
                     f.sprite.material.dispose();
                 });
                 lightningFlashes.length = 0;
