@@ -333,18 +333,28 @@
 
         .shooting-star {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 8px 3px rgba(255, 255, 255, 0.8);
+            width: 30px;
+            height: 30px;
             pointer-events: auto;
             cursor: pointer;
             opacity: 0;
             z-index: 100;
         }
 
-        .shooting-star:hover {
+        .shooting-star::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px 3px rgba(255, 255, 255, 0.8);
+        }
+
+        .shooting-star:hover::before {
             box-shadow: 0 0 15px 5px rgba(255, 255, 200, 1);
         }
 
@@ -1220,11 +1230,15 @@
             star.style.top = `${Math.random() * 25 + 3}%`;
             
             // Easter egg: click on shooting star
-            star.addEventListener('click', (e) => {
+            const handleStarClick = (e) => {
                 e.stopPropagation();
+                e.preventDefault();
                 showEasterEgg('✨ Credit by John Fyrmell ✨');
-                star.remove();
-            });
+                star.style.opacity = '0';
+                setTimeout(() => star.remove(), 100);
+            };
+            star.addEventListener('click', handleStarClick);
+            star.addEventListener('touchstart', handleStarClick);
             
             globeContainer.appendChild(star);
             
