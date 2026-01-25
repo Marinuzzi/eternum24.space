@@ -924,6 +924,93 @@
             LINGALA: { latin: 'Lingala', native: 'Lingála', file: 'Franciscus-de-Caelo-LINGALA.mp3', marker: { lat: -4.3, lon: 15.3 } }
         };
 
+        // UI Translations
+        const UI_TEXTS = {
+            la: { // Latino (default)
+                title: 'Preme orbem ut canticum audias',
+                subtitle: 'Trahe ad explorandum • preme zonam linguisticam',
+                language: 'Lingua:',
+                continuous: 'Iter perpetuum',
+                fullscreenTitle: 'Modus immersivus',
+                fullscreenHint: 'Preme orbem ut linguam mutes • ESC ad exitum',
+                clickToPlay: 'Preme ut audias:'
+            },
+            it: { // Italiano
+                title: 'Clicca sul mondo per ascoltare il canto',
+                subtitle: 'Trascina per esplorare • clicca su una zona linguistica',
+                language: 'Lingua:',
+                continuous: 'Viaggio continuo',
+                fullscreenTitle: 'Modalità immersiva',
+                fullscreenHint: 'Clicca sul mondo per cambiare lingua • ESC per uscire',
+                clickToPlay: 'Clicca per ascoltare:'
+            },
+            en: { // English
+                title: 'Click the world to hear the song',
+                subtitle: 'Drag to explore • click on a language zone',
+                language: 'Language:',
+                continuous: 'Continuous journey',
+                fullscreenTitle: 'Immersive mode',
+                fullscreenHint: 'Click the world to change language • ESC to exit',
+                clickToPlay: 'Click to play:'
+            },
+            es: { // Español
+                title: 'Haz clic en el mundo para escuchar el canto',
+                subtitle: 'Arrastra para explorar • haz clic en una zona lingüística',
+                language: 'Idioma:',
+                continuous: 'Viaje continuo',
+                fullscreenTitle: 'Modo inmersivo',
+                fullscreenHint: 'Haz clic en el mundo para cambiar idioma • ESC para salir',
+                clickToPlay: 'Clic para escuchar:'
+            },
+            fr: { // Français
+                title: 'Cliquez sur le monde pour écouter le chant',
+                subtitle: 'Faites glisser pour explorer • cliquez sur une zone linguistique',
+                language: 'Langue:',
+                continuous: 'Voyage continu',
+                fullscreenTitle: 'Mode immersif',
+                fullscreenHint: 'Cliquez sur le monde pour changer de langue • ESC pour quitter',
+                clickToPlay: 'Cliquez pour écouter:'
+            },
+            de: { // Deutsch
+                title: 'Klicken Sie auf die Welt, um das Lied zu hören',
+                subtitle: 'Ziehen zum Erkunden • klicken Sie auf eine Sprachzone',
+                language: 'Sprache:',
+                continuous: 'Kontinuierliche Reise',
+                fullscreenTitle: 'Immersiver Modus',
+                fullscreenHint: 'Klicken Sie auf die Welt, um die Sprache zu wechseln • ESC zum Beenden',
+                clickToPlay: 'Klicken zum Abspielen:'
+            },
+            pt: { // Português
+                title: 'Clique no mundo para ouvir o canto',
+                subtitle: 'Arraste para explorar • clique em uma zona linguística',
+                language: 'Idioma:',
+                continuous: 'Viagem contínua',
+                fullscreenTitle: 'Modo imersivo',
+                fullscreenHint: 'Clique no mundo para mudar o idioma • ESC para sair',
+                clickToPlay: 'Clique para ouvir:'
+            }
+        };
+
+        // Detect browser language and apply UI texts
+        function getUILanguage() {
+            const browserLang = navigator.language || navigator.userLanguage || 'la';
+            const langCode = browserLang.split('-')[0].toLowerCase();
+            return UI_TEXTS[langCode] || UI_TEXTS['la']; // Fallback to Latin
+        }
+
+        function applyUITranslations() {
+            const texts = getUILanguage();
+            document.querySelector('.map-title').textContent = texts.title;
+            document.querySelector('.map-subtitle').textContent = texts.subtitle;
+            document.querySelector('.lang-label').textContent = texts.language;
+            document.querySelector('.toggle-label').textContent = texts.continuous;
+            document.getElementById('fullscreenBtn').title = texts.fullscreenTitle;
+            document.getElementById('fullscreenHint').textContent = texts.fullscreenHint;
+        }
+
+        // Apply translations on load
+        applyUITranslations();
+
         const ZONES = [
             { key: 'SR', latMin: 29, latMax: 33.5, lonMin: 34, lonMax: 36.5 }, // Israele
             { key: 'KR', latMin: 33, latMax: 39.5, lonMin: 124, lonMax: 131 }, // Corea
@@ -1607,7 +1694,8 @@
 
                 if (langKey) {
                     const lang = LANGUAGES[langKey];
-                    activeTooltip.textContent = `Click to play: ${lang.latin} / ${lang.native}`;
+                    const uiTexts = getUILanguage();
+                    activeTooltip.textContent = `${uiTexts.clickToPlay} ${lang.latin} / ${lang.native}`;
                     activeTooltip.style.left = `${event.clientX - rect.left}px`;
                     activeTooltip.style.top = `${event.clientY - rect.top}px`;
                     activeTooltip.classList.add('visible');
