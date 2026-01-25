@@ -635,34 +635,33 @@
         }
 
         function createStarfield() {
-            const starCount = 2000;
+            const starCount = 3000;
             const geometry = new THREE.BufferGeometry();
             const positions = new Float32Array(starCount * 3);
-            const sizes = new Float32Array(starCount);
             
             for (let i = 0; i < starCount; i++) {
-                const radius = 15 + Math.random() * 35;
+                // Place stars at a medium distance where they're visible
+                const radius = 8 + Math.random() * 12;
                 const theta = Math.random() * Math.PI * 2;
                 const phi = Math.acos(2 * Math.random() - 1);
                 
                 positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
                 positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
                 positions[i * 3 + 2] = radius * Math.cos(phi);
-                sizes[i] = Math.random() * 2 + 0.5;
             }
             
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
             
             const starTexture = createStarTexture();
             const material = new THREE.PointsMaterial({
                 map: starTexture,
-                size: 0.15,
+                size: 0.12,
                 transparent: true,
-                opacity: 0.8,
+                opacity: 1.0,
                 sizeAttenuation: true,
                 depthWrite: false,
-                blending: THREE.AdditiveBlending
+                blending: THREE.AdditiveBlending,
+                color: 0xffffff
             });
             
             return new THREE.Points(geometry, material);
@@ -670,16 +669,17 @@
 
         function createStarTexture() {
             const canvas = document.createElement('canvas');
-            canvas.width = 32;
-            canvas.height = 32;
+            canvas.width = 64;
+            canvas.height = 64;
             const ctx = canvas.getContext('2d');
-            const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+            const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
             gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-            gradient.addColorStop(0.2, 'rgba(255, 255, 240, 0.8)');
-            gradient.addColorStop(0.5, 'rgba(255, 255, 220, 0.3)');
-            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            gradient.addColorStop(0.1, 'rgba(255, 255, 255, 0.9)');
+            gradient.addColorStop(0.3, 'rgba(200, 220, 255, 0.5)');
+            gradient.addColorStop(0.6, 'rgba(150, 180, 255, 0.2)');
+            gradient.addColorStop(1, 'rgba(100, 150, 255, 0)');
             ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 32, 32);
+            ctx.fillRect(0, 0, 64, 64);
             return new THREE.CanvasTexture(canvas);
         }
 
