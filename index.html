@@ -399,6 +399,42 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        .distant-planet {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 1;
+            animation: planetDrift 25s ease-in-out forwards;
+        }
+
+        .distant-planet.mars {
+            background: radial-gradient(circle at 30% 30%, #e07040, #b84020, #803010);
+            box-shadow: 0 0 15px rgba(180, 64, 32, 0.4);
+        }
+
+        .distant-planet.venus {
+            background: radial-gradient(circle at 30% 30%, #f0e8d0, #d8c8a0, #c0a870);
+            box-shadow: 0 0 20px rgba(240, 232, 208, 0.3);
+        }
+
+        @keyframes planetDrift {
+            0% {
+                opacity: 0;
+                transform: translateX(0) translateY(0) scale(0.8);
+            }
+            15% {
+                opacity: 0.7;
+            }
+            85% {
+                opacity: 0.7;
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(50px) translateY(30px) scale(1);
+            }
+        }
+
         .selected-language-info {
             display: none; /* Hidden - using compact display in header */
         }
@@ -1204,6 +1240,34 @@
             }
         }, 4000);
 
+        // Distant planets (very rare)
+        function showDistantPlanet() {
+            const planet = document.createElement('div');
+            const isMars = Math.random() > 0.5;
+            planet.className = `distant-planet ${isMars ? 'mars' : 'venus'}`;
+            
+            // Random size (small, distant)
+            const size = Math.random() * 12 + 8; // 8-20px
+            planet.style.width = `${size}px`;
+            planet.style.height = `${size}px`;
+            
+            // Position in upper corners (where space is visible)
+            const side = Math.random() > 0.5 ? 'left' : 'right';
+            planet.style[side] = `${Math.random() * 15 + 5}%`;
+            planet.style.top = `${Math.random() * 20 + 5}%`;
+            
+            globeContainer.appendChild(planet);
+            
+            setTimeout(() => planet.remove(), 26000);
+        }
+
+        // Very rare planet appearances (every 30-60 seconds, 15% chance)
+        setInterval(() => {
+            if (Math.random() < 0.15) {
+                showDistantPlanet();
+            }
+        }, 45000);
+
         // Continuous mode functions
         function getVisibleCenterLonLat() {
             // Get the camera's position relative to the globe
@@ -1407,7 +1471,7 @@
 
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-            camera.position.set(0, 0, 4.2);
+            camera.position.set(0, 0, 4.6); // 10% smaller globe
 
             renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -1541,7 +1605,8 @@
             }
 
             let zoomBackTimeout = null;
-            const fullscreenZoomDistance = 4.2 * 1.25; // Same as enterFullscreen calculation
+            const normalZoomDistance = 4.6;
+            const fullscreenZoomDistance = 4.6 * 1.15; // 15% smaller in fullscreen
 
             function onClick(event) {
                 const rect = isFullscreen ? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight } : globeContainer.getBoundingClientRect();
@@ -1578,13 +1643,11 @@
                 // Smooth zoom towards clicked point
                 targetZoom = 3.4;
                 
-                // In fullscreen, zoom back out after 3 seconds
-                if (isFullscreen) {
-                    zoomBackTimeout = setTimeout(() => {
-                        targetZoom = fullscreenZoomDistance;
-                        zoomBackTimeout = null;
-                    }, 3000);
-                }
+                // Zoom back out after 3 seconds (both modes)
+                zoomBackTimeout = setTimeout(() => {
+                    targetZoom = isFullscreen ? fullscreenZoomDistance : normalZoomDistance;
+                    zoomBackTimeout = null;
+                }, 3000);
                 
                 playLanguage(langKey, point);
             }
