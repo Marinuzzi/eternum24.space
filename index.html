@@ -7,7 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -17,7 +16,7 @@
 
         body {
             font-family: 'Cormorant Garamond', 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
-            background: linear-gradient(180deg, #050508 0%, #0a0a12 50%, #050508 100%);
+            background: radial-gradient(circle at top, #0a0b12 0%, #050508 70%);
             color: #e8d5b7;
             text-align: center;
             min-height: 100vh;
@@ -138,13 +137,12 @@
         .world-section {
             margin: 40px 0;
             padding: 30px;
-            background: 
-                linear-gradient(135deg, rgba(5, 5, 15, 0.8) 0%, rgba(10, 10, 20, 0.9) 100%);
+            background: linear-gradient(135deg, rgba(6, 7, 12, 0.92) 0%, rgba(10, 12, 18, 0.96) 100%);
             border-radius: 20px;
             border: 1px solid rgba(212, 175, 55, 0.2);
             box-shadow: 
                 0 10px 40px rgba(0, 0, 0, 0.8),
-                inset 0 0 60px rgba(212, 175, 55, 0.05);
+                inset 0 0 60px rgba(212, 175, 55, 0.06);
         }
 
         .map-title {
@@ -165,11 +163,11 @@
 
         .globe-container {
             width: 100%;
-            height: 550px;
+            height: 560px;
             position: relative;
             margin: 20px 0;
             cursor: grab;
-            border-radius: 15px;
+            border-radius: 16px;
             overflow: hidden;
         }
 
@@ -184,11 +182,11 @@
         .selected-language-info {
             margin-top: 20px;
             padding: 15px 25px;
-            background: rgba(212, 175, 55, 0.1);
-            border-radius: 10px;
-            border: 1px solid rgba(212, 175, 55, 0.3);
+            background: rgba(212, 175, 55, 0.08);
+            border-radius: 12px;
+            border: 1px solid rgba(212, 175, 55, 0.25);
             display: inline-block;
-            min-width: 200px;
+            min-width: 240px;
         }
 
         .selected-language-info .label {
@@ -206,13 +204,12 @@
         .audio-controls {
             margin: 40px 0;
             padding: 35px;
-            background: 
-                linear-gradient(135deg, rgba(5, 5, 15, 0.8) 0%, rgba(10, 10, 20, 0.9) 100%);
+            background: linear-gradient(135deg, rgba(6, 7, 12, 0.92) 0%, rgba(10, 12, 18, 0.96) 100%);
             border-radius: 20px;
             border: 1px solid rgba(212, 175, 55, 0.2);
             box-shadow: 
                 0 10px 40px rgba(0, 0, 0, 0.8),
-                inset 0 0 60px rgba(212, 175, 55, 0.05);
+                inset 0 0 60px rgba(212, 175, 55, 0.06);
         }
 
         .current-language {
@@ -232,18 +229,20 @@
         }
 
         .play-button {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
             background: linear-gradient(135deg, #8b6914 0%, #d4af37 30%, #f4d03f 50%, #d4af37 70%, #8b6914 100%);
             background-size: 200% 200%;
             color: #1a0a0a;
-            padding: 18px 40px;
-            font-size: 1.3em;
+            padding: 16px 34px;
+            font-size: 1.2em;
             font-family: 'Cinzel', serif;
             font-weight: 700;
             border: none;
             cursor: pointer;
-            margin: 20px 0;
-            border-radius: 50px;
+            margin: 18px 0;
+            border-radius: 999px;
             transition: all 0.3s ease;
             box-shadow: 
                 0 6px 20px rgba(212, 175, 55, 0.5),
@@ -264,6 +263,47 @@
         .play-button.playing {
             background: linear-gradient(135deg, #6b4e0f 0%, #b8960b 30%, #d4af37 50%, #b8960b 70%, #6b4e0f 100%);
             animation: buttonPulse 2s ease-in-out infinite;
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .volume-control {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #8b7355;
+            font-size: 0.95em;
+        }
+
+        .volume-control input[type="range"] {
+            width: 140px;
+            accent-color: #d4af37;
+        }
+
+        .tooltip {
+            position: absolute;
+            padding: 8px 12px;
+            background: rgba(10, 12, 18, 0.95);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            border-radius: 8px;
+            color: #e8d5b7;
+            font-size: 0.9em;
+            pointer-events: none;
+            transform: translate(-50%, -120%);
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            white-space: nowrap;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .tooltip.visible {
+            opacity: 1;
         }
 
         @keyframes buttonPulse {
@@ -294,9 +334,10 @@
             h1 { font-size: 2.5em; }
             h2 { font-size: 1.4em; }
             .spiritual-symbol { width: 90px; height: 90px; }
-            .globe-container { height: 400px; }
+            .globe-container { height: 420px; }
             .world-section, .audio-controls { padding: 20px; }
-            .play-button { padding: 15px 30px; font-size: 1.1em; }
+            .play-button { padding: 14px 26px; font-size: 1.05em; }
+            .volume-control input[type="range"] { width: 110px; }
         }
     </style>
 </head>
@@ -315,12 +356,10 @@
                             <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
                         </filter>
                     </defs>
-                    <!-- Colomba che ascende -->
                     <ellipse cx="50" cy="55" rx="12" ry="18" fill="url(#doveGrad)" filter="url(#glow)"/>
                     <circle cx="50" cy="40" r="10" fill="url(#doveGrad)" filter="url(#glow)"/>
                     <path d="M 38 50 Q 20 35 15 42 Q 22 50 38 60 Z" fill="url(#doveGrad)" filter="url(#glow)"/>
                     <path d="M 62 50 Q 80 35 85 42 Q 78 50 62 60 Z" fill="url(#doveGrad)" filter="url(#glow)"/>
-                    <!-- Raggi di luce -->
                     <line x1="50" y1="25" x2="50" y2="10" stroke="#f4d03f" stroke-width="2" opacity="0.7"/>
                     <line x1="40" y1="28" x2="35" y2="15" stroke="#f4d03f" stroke-width="1.5" opacity="0.5"/>
                     <line x1="60" y1="28" x2="65" y2="15" stroke="#f4d03f" stroke-width="1.5" opacity="0.5"/>
@@ -333,19 +372,27 @@
 
         <div class="world-section">
             <div class="map-title">Clicca sul mondo per ascoltare il canto</div>
-            <div class="map-subtitle">Il globo ruota — trascinalo per esplorare — clicca su una zona illuminata</div>
-            <div class="globe-container" id="globeContainer"></div>
+            <div class="map-subtitle">Il globo ruota — trascinalo per esplorare — clicca su una zona linguistica</div>
+            <div class="globe-container" id="globeContainer">
+                <div class="tooltip" id="tooltip"></div>
+            </div>
             <div class="selected-language-info">
-                <div class="label">Lingua selezionata:</div>
-                <div class="language-name" id="selectedLanguageName">Latina</div>
+                <div class="label">Lingua selezionata</div>
+                <div class="language-name" id="selectedLanguageName">Latina / Latina</div>
             </div>
         </div>
 
         <div class="audio-controls">
-            <div class="current-language" id="currentLanguage">Latina</div>
-            <div class="instructions">Premi per ascoltare:</div>
-            <button id="playButton" class="play-button">▶ Audi Canticum</button>
-            <audio id="audioPlayer" loop>
+            <div class="current-language" id="currentLanguage">Latina / Latina</div>
+            <div class="instructions">Un solo player. Nessun autoplay: parte solo con click.</div>
+            <div class="controls-row">
+                <button id="playButton" class="play-button">▶ Audi Canticum</button>
+                <label class="volume-control">
+                    Volume
+                    <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.8" />
+                </label>
+            </div>
+            <audio id="audioPlayer" preload="none">
                 <source id="audioSource" src="Franciscus-de-Caelo-LT.mp3" type="audio/mpeg">
             </audio>
         </div>
@@ -356,402 +403,376 @@
         </footer>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const playButton = document.getElementById('playButton');
-            const audioPlayer = document.getElementById('audioPlayer');
-            const audioSource = document.getElementById('audioSource');
-            const currentLanguageEl = document.getElementById('currentLanguage');
-            const selectedLanguageName = document.getElementById('selectedLanguageName');
-            const globeContainer = document.getElementById('globeContainer');
-            
-            // Lingue con coordinate geografiche
-            const languages = {
-                latin: { file: "Franciscus-de-Caelo-LT.mp3", name: "Latina", native: "Latina", lat: 41.9, lon: 12.5 },
-                italian: { file: "Franciscus-de-Caelo-IT.mp3", name: "Italica", native: "Italiano", lat: 42.5, lon: 12.5 },
-                spanish: { file: "Franciscus-de-Caelo-SP.mp3", name: "Hispanica", native: "Español", lat: 40.4, lon: -3.7 },
-                portuguese: { file: "Franciscus-de-Caelo-POR.mp3", name: "Lusitana", native: "Português", lat: -15.8, lon: -47.9 },
-                french: { file: "Franciscus-de-Caelo-FR.mp3", name: "Gallica", native: "Français", lat: 48.9, lon: 2.3 },
-                english: { file: "Franciscus-de-Caelo-UK.mp3", name: "Anglica", native: "English", lat: 51.5, lon: -0.1 },
-                german: { file: "Franciscus-de-Caelo-TE.mp3", name: "Germanica", native: "Deutsch", lat: 52.5, lon: 13.4 },
-                russian: { file: "Franciscus-de-Caelo-RU.mp3", name: "Russica", native: "Русский", lat: 55.8, lon: 37.6 },
-                arabic: { file: "Franciscus-de-Caelo-ARA.mp3", name: "Arabica", native: "العربية", lat: 24.7, lon: 46.7 },
-                hebrew: { file: "Franciscus-de-Caelo-SR.mp3", name: "Hebraica", native: "עברית", lat: 31.8, lon: 35.2 },
-                chinese: { file: "Franciscus-de-Caelo-CIN.mp3", name: "Sinica", native: "中文", lat: 39.9, lon: 116.4 },
-                korean: { file: "Franciscus-de-Caelo-KR.mp3", name: "Coreana", native: "한국어", lat: 37.6, lon: 127.0 },
-                swahili: { file: "Franciscus-de-Caelo-SWAHILI.mp3", name: "Swahili", native: "Kiswahili", lat: -1.3, lon: 36.8 },
-                hausa: { file: "Franciscus-de-Caelo-HAUSA.mp3", name: "Hausa", native: "Hausa", lat: 12.0, lon: 8.5 },
-                lingala: { file: "Franciscus-de-Caelo-LINGALA.mp3", name: "Lingala", native: "Lingála", lat: -4.3, lon: 15.3 }
-            };
+    <script type="module">
+        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js';
+        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/controls/OrbitControls.js';
 
-            let currentLang = 'latin';
-            let scene, camera, renderer, globe, markers = [], markerGroup;
-            let isDragging = false;
-            let previousMousePosition = { x: 0, y: 0 };
-            let autoRotate = true;
+        const globeContainer = document.getElementById('globeContainer');
+        const tooltip = document.getElementById('tooltip');
+        const playButton = document.getElementById('playButton');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const audioSource = document.getElementById('audioSource');
+        const currentLanguageEl = document.getElementById('currentLanguage');
+        const selectedLanguageName = document.getElementById('selectedLanguageName');
+        const volumeSlider = document.getElementById('volumeSlider');
 
-            function initGlobe() {
-                const width = globeContainer.offsetWidth;
-                const height = globeContainer.offsetHeight;
+        const LANGUAGES = {
+            LT: { latin: 'Latina', native: 'Latina', file: 'Franciscus-de-Caelo-LT.mp3', marker: { lat: 41.9, lon: 12.5 } },
+            IT: { latin: 'Italica', native: 'Italiano', file: 'Franciscus-de-Caelo-IT.mp3', marker: { lat: 42.5, lon: 12.5 } },
+            SP: { latin: 'Hispanica', native: 'Español', file: 'Franciscus-de-Caelo-SP.mp3', marker: { lat: 40.4, lon: -3.7 } },
+            POR: { latin: 'Lusitana', native: 'Português', file: 'Franciscus-de-Caelo-POR.mp3', marker: { lat: -15.8, lon: -47.9 } },
+            FR: { latin: 'Gallica', native: 'Français', file: 'Franciscus-de-Caelo-FR.mp3', marker: { lat: 48.9, lon: 2.3 } },
+            UK: { latin: 'Anglica', native: 'English', file: 'Franciscus-de-Caelo-UK.mp3', marker: { lat: 51.5, lon: -0.1 } },
+            TE: { latin: 'Germanica', native: 'Deutsch', file: 'Franciscus-de-Caelo-TE.mp3', marker: { lat: 52.5, lon: 13.4 } },
+            RU: { latin: 'Russica', native: 'Русский', file: 'Franciscus-de-Caelo-RU.mp3', marker: { lat: 55.8, lon: 37.6 } },
+            ARA: { latin: 'Arabica', native: 'العربية', file: 'Franciscus-de-Caelo-ARA.mp3', marker: { lat: 24.7, lon: 46.7 } },
+            SR: { latin: 'Hebraica', native: 'עברית', file: 'Franciscus-de-Caelo-SR.mp3', marker: { lat: 31.8, lon: 35.2 } },
+            CIN: { latin: 'Sinica', native: '中文', file: 'Franciscus-de-Caelo-CIN.mp3', marker: { lat: 39.9, lon: 116.4 } },
+            KR: { latin: 'Coreana', native: '한국어', file: 'Franciscus-de-Caelo-KR.mp3', marker: { lat: 37.6, lon: 127.0 } },
+            SWAHILI: { latin: 'Swahili', native: 'Kiswahili', file: 'Franciscus-de-Caelo-SWAHILI.mp3', marker: { lat: -1.3, lon: 36.8 } },
+            HAUSA: { latin: 'Hausa', native: 'Hausa', file: 'Franciscus-de-Caelo-HAUSA.mp3', marker: { lat: 12.0, lon: 8.5 } },
+            LINGALA: { latin: 'Lingala', native: 'Lingála', file: 'Franciscus-de-Caelo-LINGALA.mp3', marker: { lat: -4.3, lon: 15.3 } }
+        };
 
-                // Scene
-                scene = new THREE.Scene();
-                
-                // Camera
-                camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-                camera.position.z = 4;
+        const ZONES = [
+            { key: 'SR', latMin: 29, latMax: 33.5, lonMin: 34, lonMax: 36.5 }, // Israele
+            { key: 'KR', latMin: 33, latMax: 39.5, lonMin: 124, lonMax: 131 }, // Corea
+            { key: 'CIN', latMin: 18, latMax: 53, lonMin: 73, lonMax: 135 }, // Cina
+            { key: 'TE', latMin: 47, latMax: 55.5, lonMin: 5, lonMax: 16 }, // Germania
+            { key: 'IT', latMin: 36, latMax: 47, lonMin: 6, lonMax: 19 }, // Italia
+            { key: 'LT', latMin: 41, latMax: 43, lonMin: 11, lonMax: 13 }, // Roma/Vaticano
+            { key: 'FR', latMin: 42, latMax: 51.5, lonMin: -5, lonMax: 8 }, // Francia
+            { key: 'SP', latMin: 36, latMax: 44, lonMin: -10, lonMax: 4 }, // Spagna
+            { key: 'POR', latMin: 36, latMax: 42.5, lonMin: -10, lonMax: -6 }, // Portogallo
+            { key: 'RU', latMin: 50, latMax: 70, lonMin: 30, lonMax: 180 }, // Russia
+            { key: 'ARA', latMin: 12, latMax: 36, lonMin: -10, lonMax: 60 }, // MENA
+            { key: 'SWAHILI', latMin: -11, latMax: 5, lonMin: 28, lonMax: 45 }, // Est Africa
+            { key: 'HAUSA', latMin: 9, latMax: 20, lonMin: -5, lonMax: 15 }, // Sahel ovest
+            { key: 'LINGALA', latMin: -6, latMax: 4, lonMin: 12, lonMax: 25 }, // Congo basin
+            { key: 'SP', latMin: 8, latMax: 26, lonMin: -100, lonMax: -70 }, // Messico/C.A.
+            { key: 'SP', latMin: -55, latMax: 12, lonMin: -80, lonMax: -35 }, // Sud America isp.
+            { key: 'POR', latMin: -34, latMax: 5, lonMin: -75, lonMax: -35 }, // Brasile
+            { key: 'UK', latMin: 50, latMax: 60, lonMin: -10, lonMax: 2 }, // UK/Ireland
+            { key: 'UK', latMin: 25, latMax: 60, lonMin: -130, lonMax: -60 }, // USA/Canada
+            { key: 'UK', latMin: -35, latMax: -22, lonMin: 16, lonMax: 33 }, // Sudafrica
+            { key: 'UK', latMin: -44, latMax: -10, lonMin: 110, lonMax: 155 }, // Australia
+            { key: 'UK', latMin: -48, latMax: -34, lonMin: 165, lonMax: -175 }, // Nuova Zelanda (wrap)
+            { key: 'UK', latMin: 8, latMax: 28, lonMin: 70, lonMax: 90 } // India
+        ];
 
-                // Renderer
-                renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-                renderer.setSize(width, height);
-                renderer.setPixelRatio(window.devicePixelRatio);
-                globeContainer.appendChild(renderer.domElement);
+        let currentLang = 'LT';
+        let scene, camera, renderer, globe, controls;
+        let markers = [];
+        let activeMarker = null;
+        let activeRing = null;
+        let fadeRaf = null;
 
-                // Luci
-                const ambientLight = new THREE.AmbientLight(0x333333, 1);
-                scene.add(ambientLight);
-                
-                const pointLight = new THREE.PointLight(0xffffff, 1.5);
-                pointLight.position.set(5, 3, 5);
-                scene.add(pointLight);
+        function normalizeLon(lon) {
+            let out = lon;
+            while (out > 180) out -= 360;
+            while (out < -180) out += 360;
+            return out;
+        }
 
-                // Gruppo per il globo e i marker (così ruotano insieme)
-                markerGroup = new THREE.Group();
-                scene.add(markerGroup);
-
-                // Globo con texture della Terra di notte
-                const globeGeometry = new THREE.SphereGeometry(1.5, 64, 64);
-                
-                // Texture loader
-                const textureLoader = new THREE.TextureLoader();
-                
-                // Usa una texture della Terra di notte
-                const earthTexture = textureLoader.load(
-                    'https://raw.githubusercontent.com/turban/webgl-earth/master/images/2_no_clouds_8k.jpg',
-                    function(texture) {
-                        globeMaterial.map = texture;
-                        globeMaterial.needsUpdate = true;
-                    }
-                );
-                
-                const nightTexture = textureLoader.load(
-                    'https://raw.githubusercontent.com/turban/webgl-earth/master/images/earth_lights_lrg.jpg',
-                    function(texture) {
-                        globeMaterial.emissiveMap = texture;
-                        globeMaterial.emissive = new THREE.Color(0xffaa44);
-                        globeMaterial.emissiveIntensity = 0.8;
-                        globeMaterial.needsUpdate = true;
-                    }
-                );
-
-                const globeMaterial = new THREE.MeshPhongMaterial({
-                    color: 0x1a2a3a,
-                    shininess: 25
-                });
-
-                globe = new THREE.Mesh(globeGeometry, globeMaterial);
-                markerGroup.add(globe);
-
-                // Atmosfera (glow esterno)
-                const atmosphereGeometry = new THREE.SphereGeometry(1.55, 64, 64);
-                const atmosphereMaterial = new THREE.MeshBasicMaterial({
-                    color: 0x4488ff,
-                    transparent: true,
-                    opacity: 0.1,
-                    side: THREE.BackSide
-                });
-                const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
-                markerGroup.add(atmosphere);
-
-                // Aggiungi marker per ogni lingua
-                Object.keys(languages).forEach(langKey => {
-                    const lang = languages[langKey];
-                    const position = latLonToVector3(lang.lat, lang.lon, 1.52);
-                    
-                    // Marker principale
-                    const markerGeometry = new THREE.SphereGeometry(0.04, 16, 16);
-                    const markerMaterial = new THREE.MeshBasicMaterial({ 
-                        color: 0xd4af37
-                    });
-                    const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-                    marker.position.copy(position);
-                    marker.userData = { lang: langKey, data: lang };
-                    markerGroup.add(marker);
-                    markers.push(marker);
-
-                    // Glow del marker
-                    const glowGeometry = new THREE.SphereGeometry(0.07, 16, 16);
-                    const glowMaterial = new THREE.MeshBasicMaterial({ 
-                        color: 0xd4af37,
-                        transparent: true,
-                        opacity: 0.4
-                    });
-                    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-                    glow.position.copy(position);
-                    markerGroup.add(glow);
-                    marker.userData.glow = glow;
-
-                    // Anello pulsante
-                    const ringGeometry = new THREE.RingGeometry(0.06, 0.08, 32);
-                    const ringMaterial = new THREE.MeshBasicMaterial({ 
-                        color: 0xf4d03f,
-                        transparent: true,
-                        opacity: 0.6,
-                        side: THREE.DoubleSide
-                    });
-                    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-                    ring.position.copy(position);
-                    ring.lookAt(new THREE.Vector3(0, 0, 0));
-                    markerGroup.add(ring);
-                    marker.userData.ring = ring;
-                });
-
-                // Evidenzia il marker iniziale
-                highlightMarker('latin');
-
-                // Animazione
-                let time = 0;
-                function animate() {
-                    requestAnimationFrame(animate);
-                    time += 0.02;
-                    
-                    // Rotazione automatica
-                    if (autoRotate && !isDragging) {
-                        markerGroup.rotation.y += 0.003;
-                    }
-
-                    // Animazione dei marker
-                    markers.forEach(marker => {
-                        if (marker.userData.ring) {
-                            marker.userData.ring.scale.setScalar(1 + Math.sin(time * 2) * 0.1);
-                            marker.userData.ring.material.opacity = 0.4 + Math.sin(time * 2) * 0.2;
-                        }
-                    });
-                    
-                    renderer.render(scene, camera);
-                }
-                animate();
-
-                // Interazione
-                const raycaster = new THREE.Raycaster();
-                const mouse = new THREE.Vector2();
-
-                function onMouseMove(event) {
-                    if (isDragging) {
-                        const deltaX = event.clientX - previousMousePosition.x;
-                        const deltaY = event.clientY - previousMousePosition.y;
-
-                        markerGroup.rotation.y += deltaX * 0.005;
-                        markerGroup.rotation.x += deltaY * 0.005;
-                        markerGroup.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, markerGroup.rotation.x));
-
-                        previousMousePosition = { x: event.clientX, y: event.clientY };
-                    } else {
-                        const rect = globeContainer.getBoundingClientRect();
-                        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-                        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-                        raycaster.setFromCamera(mouse, camera);
-                        const intersects = raycaster.intersectObjects(markers);
-
-                        if (intersects.length > 0) {
-                            globeContainer.style.cursor = 'pointer';
-                            const hoveredMarker = intersects[0].object;
-                            hoveredMarker.scale.setScalar(1.5);
-                        } else {
-                            globeContainer.style.cursor = 'grab';
-                            markers.forEach(m => {
-                                if (m.userData.lang !== currentLang) {
-                                    m.scale.setScalar(1);
-                                }
-                            });
-                        }
-                    }
-                }
-
-                function onMouseDown(event) {
-                    isDragging = true;
-                    autoRotate = false;
-                    previousMousePosition = { x: event.clientX, y: event.clientY };
-                    globeContainer.style.cursor = 'grabbing';
-                }
-
-                function onMouseUp(event) {
-                    if (!isDragging) return;
-                    isDragging = false;
-                    globeContainer.style.cursor = 'grab';
-                    
-                    // Riattiva rotazione dopo 3 secondi
-                    setTimeout(() => { autoRotate = true; }, 3000);
-                }
-
-                function onClick(event) {
-                    const rect = globeContainer.getBoundingClientRect();
-                    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-                    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-                    raycaster.setFromCamera(mouse, camera);
-                    
-                    // Prima controlla i marker
-                    const markerIntersects = raycaster.intersectObjects(markers);
-                    if (markerIntersects.length > 0) {
-                        const lang = markerIntersects[0].object.userData.lang;
-                        selectLanguage(lang);
-                        return;
-                    }
-
-                    // Se clicca sul globo, trova la lingua più vicina
-                    const globeIntersects = raycaster.intersectObject(globe);
-                    if (globeIntersects.length > 0) {
-                        const point = globeIntersects[0].point;
-                        // Converti in coordinate sferiche
-                        const spherical = new THREE.Spherical();
-                        spherical.setFromVector3(point.clone().applyMatrix4(markerGroup.matrixWorld.clone().invert()));
-                        
-                        const lat = 90 - THREE.MathUtils.radToDeg(spherical.phi);
-                        const lon = THREE.MathUtils.radToDeg(spherical.theta) - 90;
-                        
-                        // Trova la lingua più vicina
-                        let nearestLang = 'latin';
-                        let nearestDist = Infinity;
-                        
-                        Object.keys(languages).forEach(langKey => {
-                            const lang = languages[langKey];
-                            const dist = Math.sqrt(
-                                Math.pow(lat - lang.lat, 2) + 
-                                Math.pow(lon - lang.lon, 2)
-                            );
-                            if (dist < nearestDist) {
-                                nearestDist = dist;
-                                nearestLang = langKey;
-                            }
-                        });
-                        
-                        selectLanguage(nearestLang);
-                    }
-                }
-
-                globeContainer.addEventListener('mousemove', onMouseMove);
-                globeContainer.addEventListener('mousedown', onMouseDown);
-                globeContainer.addEventListener('mouseup', onMouseUp);
-                globeContainer.addEventListener('mouseleave', onMouseUp);
-                globeContainer.addEventListener('click', onClick);
-
-                // Touch support
-                globeContainer.addEventListener('touchstart', (e) => {
-                    isDragging = true;
-                    autoRotate = false;
-                    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-                });
-                
-                globeContainer.addEventListener('touchmove', (e) => {
-                    if (!isDragging) return;
-                    const deltaX = e.touches[0].clientX - previousMousePosition.x;
-                    const deltaY = e.touches[0].clientY - previousMousePosition.y;
-                    markerGroup.rotation.y += deltaX * 0.005;
-                    markerGroup.rotation.x += deltaY * 0.005;
-                    markerGroup.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, markerGroup.rotation.x));
-                    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-                });
-                
-                globeContainer.addEventListener('touchend', () => {
-                    isDragging = false;
-                    setTimeout(() => { autoRotate = true; }, 3000);
-                });
-
-                // Responsive
-                window.addEventListener('resize', () => {
-                    const width = globeContainer.offsetWidth;
-                    const height = globeContainer.offsetHeight;
-                    camera.aspect = width / height;
-                    camera.updateProjectionMatrix();
-                    renderer.setSize(width, height);
-                });
+        function inZone(lat, lon, zone) {
+            if (lat < zone.latMin || lat > zone.latMax) return false;
+            if (zone.lonMin <= zone.lonMax) {
+                return lon >= zone.lonMin && lon <= zone.lonMax;
             }
+            return lon >= zone.lonMin || lon <= zone.lonMax;
+        }
 
-            function latLonToVector3(lat, lon, radius) {
-                const phi = (90 - lat) * (Math.PI / 180);
-                const theta = (lon + 180) * (Math.PI / 180);
-                
-                const x = -radius * Math.sin(phi) * Math.cos(theta);
-                const y = radius * Math.cos(phi);
-                const z = radius * Math.sin(phi) * Math.sin(theta);
-                
-                return new THREE.Vector3(x, y, z);
+        function getLanguageForLatLon(lat, lon) {
+            const nlon = normalizeLon(lon);
+            for (const zone of ZONES) {
+                if (inZone(lat, nlon, zone)) return zone.key;
             }
+            return null;
+        }
 
-            function highlightMarker(langKey) {
-                markers.forEach(marker => {
-                    if (marker.userData.lang === langKey) {
-                        marker.scale.setScalar(1.8);
-                        marker.material.color.setHex(0xf4d03f);
-                        if (marker.userData.glow) {
-                            marker.userData.glow.material.opacity = 0.7;
-                            marker.userData.glow.scale.setScalar(1.5);
-                        }
-                    } else {
-                        marker.scale.setScalar(1);
-                        marker.material.color.setHex(0xd4af37);
-                        if (marker.userData.glow) {
-                            marker.userData.glow.material.opacity = 0.4;
-                            marker.userData.glow.scale.setScalar(1);
-                        }
-                    }
-                });
-            }
+        function latLonToVector3(lat, lon, radius) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+            const x = -radius * Math.sin(phi) * Math.cos(theta);
+            const y = radius * Math.cos(phi);
+            const z = radius * Math.sin(phi) * Math.sin(theta);
+            return new THREE.Vector3(x, y, z);
+        }
 
-            function selectLanguage(lang) {
-                currentLang = lang;
-                const langData = languages[lang];
-                
-                // Aggiorna UI
-                currentLanguageEl.textContent = langData.name;
-                selectedLanguageName.textContent = langData.name + ' (' + langData.native + ')';
-                
-                // Evidenzia marker
-                highlightMarker(lang);
-                
-                // Cambia audio e avvia
-                audioPlayer.pause();
-                audioSource.src = langData.file;
-                audioPlayer.load();
-                
-                // Avvia automaticamente la riproduzione
-                audioPlayer.play().then(() => {
-                    playButton.textContent = '⏸ Pausa';
-                    playButton.classList.add('playing');
-                }).catch(e => {
-                    console.error('Play error:', e);
-                });
-            }
+        function vector3ToLatLon(vec) {
+            const v = vec.clone().normalize();
+            const lat = 90 - THREE.MathUtils.radToDeg(Math.acos(v.y));
+            const lon = THREE.MathUtils.radToDeg(Math.atan2(v.z, v.x)) - 180;
+            return { lat, lon: normalizeLon(lon) };
+        }
 
-            // Play/Pause button
-            playButton.addEventListener('click', function() {
-                if (audioPlayer.paused) {
-                    audioPlayer.play().then(() => {
-                        playButton.textContent = '⏸ Pausa';
-                        playButton.classList.add('playing');
-                    }).catch(e => console.error('Play error:', e));
+        function createGlowSprite(color) {
+            const size = 128;
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+            gradient.addColorStop(0, `rgba(${color.r * 255}, ${color.g * 255}, ${color.b * 255}, 0.9)`);
+            gradient.addColorStop(0.5, `rgba(${color.r * 255}, ${color.g * 255}, ${color.b * 255}, 0.4)`);
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(0.25, 0.25, 0.25);
+            return sprite;
+        }
+
+        function initGlobe() {
+            const width = globeContainer.clientWidth;
+            const height = globeContainer.clientHeight;
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.set(0, 0, 4.2);
+
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(width, height);
+            globeContainer.appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0x222222, 1.2);
+            scene.add(ambientLight);
+            const pointLight = new THREE.PointLight(0xffffff, 1.6);
+            pointLight.position.set(5, 3, 5);
+            scene.add(pointLight);
+
+            const globeGeometry = new THREE.SphereGeometry(1.55, 64, 64);
+            const globeMaterial = new THREE.MeshPhongMaterial({
+                color: 0x0a1420,
+                shininess: 15
+            });
+
+            globe = new THREE.Mesh(globeGeometry, globeMaterial);
+            scene.add(globe);
+
+            const textureLoader = new THREE.TextureLoader();
+            textureLoader.load(
+                'https://cdn.jsdelivr.net/gh/turban/webgl-earth@master/images/2_no_clouds_8k.jpg',
+                (tex) => {
+                    globeMaterial.map = tex;
+                    globeMaterial.needsUpdate = true;
+                }
+            );
+            textureLoader.load(
+                'https://cdn.jsdelivr.net/gh/turban/webgl-earth@master/images/earth_lights_lrg.jpg',
+                (tex) => {
+                    globeMaterial.emissiveMap = tex;
+                    globeMaterial.emissive = new THREE.Color(0xffaa44);
+                    globeMaterial.emissiveIntensity = 1.1;
+                    globeMaterial.needsUpdate = true;
+                }
+            );
+
+            const atmosphereGeometry = new THREE.SphereGeometry(1.62, 64, 64);
+            const atmosphereMaterial = new THREE.MeshBasicMaterial({
+                color: 0x2b6cb0,
+                transparent: true,
+                opacity: 0.08,
+                side: THREE.BackSide
+            });
+            const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+            scene.add(atmosphere);
+
+            Object.entries(LANGUAGES).forEach(([code, lang]) => {
+                const pos = latLonToVector3(lang.marker.lat, lang.marker.lon, 1.57);
+                const glow = createGlowSprite(new THREE.Color(0xd4af37));
+                glow.position.copy(pos);
+                glow.userData = { code };
+                globe.add(glow);
+                markers.push(glow);
+            });
+
+            activeMarker = createGlowSprite(new THREE.Color(0xf4d03f));
+            activeMarker.scale.set(0.35, 0.35, 0.35);
+            globe.add(activeMarker);
+            activeMarker.visible = false;
+
+            const ringGeometry = new THREE.RingGeometry(0.08, 0.12, 32);
+            const ringMaterial = new THREE.MeshBasicMaterial({ color: 0xf4d03f, transparent: true, opacity: 0.7, side: THREE.DoubleSide });
+            activeRing = new THREE.Mesh(ringGeometry, ringMaterial);
+            globe.add(activeRing);
+            activeRing.visible = false;
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.07;
+            controls.enablePan = false;
+            controls.minDistance = 3.1;
+            controls.maxDistance = 5.8;
+            controls.minPolarAngle = 0.35;
+            controls.maxPolarAngle = 2.5;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.35;
+
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+
+            function onPointerMove(event) {
+                const rect = globeContainer.getBoundingClientRect();
+                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObject(globe);
+                if (intersects.length === 0) {
+                    tooltip.classList.remove('visible');
+                    globeContainer.style.cursor = 'default';
+                    return;
+                }
+
+                const point = intersects[0].point;
+                const { lat, lon } = vector3ToLatLon(point);
+                const langKey = getLanguageForLatLon(lat, lon);
+
+                if (langKey) {
+                    const lang = LANGUAGES[langKey];
+                    tooltip.textContent = `Click to play: ${lang.latin} / ${lang.native}`;
+                    tooltip.style.left = `${event.clientX - rect.left}px`;
+                    tooltip.style.top = `${event.clientY - rect.top}px`;
+                    tooltip.classList.add('visible');
+                    globeContainer.style.cursor = 'pointer';
                 } else {
-                    audioPlayer.pause();
-                    playButton.textContent = '▶ Audi Canticum';
-                    playButton.classList.remove('playing');
+                    tooltip.classList.remove('visible');
+                    globeContainer.style.cursor = 'default';
                 }
+            }
+
+            function onClick(event) {
+                const rect = globeContainer.getBoundingClientRect();
+                mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObject(globe);
+                if (intersects.length === 0) return;
+
+                const point = intersects[0].point;
+                const { lat, lon } = vector3ToLatLon(point);
+                const langKey = getLanguageForLatLon(lat, lon);
+                if (!langKey) return;
+
+                playLanguage(langKey, point);
+            }
+
+            globeContainer.addEventListener('mousemove', onPointerMove);
+            globeContainer.addEventListener('mouseleave', () => {
+                tooltip.classList.remove('visible');
+                globeContainer.style.cursor = 'default';
+            });
+            globeContainer.addEventListener('click', onClick);
+
+            window.addEventListener('resize', () => {
+                const w = globeContainer.clientWidth;
+                const h = globeContainer.clientHeight;
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+                renderer.setSize(w, h);
             });
 
-            audioPlayer.addEventListener('play', function() {
-                playButton.textContent = '⏸ Pausa';
+            const clock = new THREE.Clock();
+            function animate() {
+                clock.getDelta();
+                controls.update();
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        function updateUI(langKey) {
+            const lang = LANGUAGES[langKey];
+            const label = `${lang.latin} / ${lang.native}`;
+            currentLanguageEl.textContent = label;
+            selectedLanguageName.textContent = label;
+        }
+
+        function setActiveMarker(point) {
+            const pos = point.clone().normalize().multiplyScalar(1.57);
+            activeMarker.position.copy(pos);
+            activeRing.position.copy(pos);
+            activeRing.lookAt(new THREE.Vector3(0, 0, 0));
+            activeMarker.visible = true;
+            activeRing.visible = true;
+        }
+
+        function fadeTo(target, duration = 200) {
+            if (fadeRaf) cancelAnimationFrame(fadeRaf);
+            return new Promise((resolve) => {
+                const start = audioPlayer.volume;
+                const startTime = performance.now();
+                const step = (now) => {
+                    const t = Math.min((now - startTime) / duration, 1);
+                    audioPlayer.volume = start + (target - start) * t;
+                    if (t < 1) {
+                        fadeRaf = requestAnimationFrame(step);
+                    } else {
+                        fadeRaf = null;
+                        resolve();
+                    }
+                };
+                fadeRaf = requestAnimationFrame(step);
+            });
+        }
+
+        async function playLanguage(langKey, point) {
+            const lang = LANGUAGES[langKey];
+            currentLang = langKey;
+            updateUI(langKey);
+            if (point) setActiveMarker(point);
+
+            const targetVolume = parseFloat(volumeSlider.value);
+            if (!audioPlayer.paused) {
+                await fadeTo(0, 200);
+                audioPlayer.pause();
+            }
+
+            audioSource.src = lang.file;
+            audioPlayer.load();
+            audioPlayer.volume = 0;
+            try {
+                await audioPlayer.play();
+                await fadeTo(targetVolume, 200);
                 playButton.classList.add('playing');
-            });
+                playButton.textContent = '⏸ Pausa';
+            } catch (err) {
+                // No autoplay unless user clicks; ignore if blocked.
+            }
+        }
 
-            audioPlayer.addEventListener('pause', function() {
-                playButton.textContent = '▶ Audi Canticum';
+        playButton.addEventListener('click', async () => {
+            const targetVolume = parseFloat(volumeSlider.value);
+            if (audioPlayer.paused) {
+                audioSource.src = LANGUAGES[currentLang].file;
+                audioPlayer.load();
+                audioPlayer.volume = 0;
+                try {
+                    await audioPlayer.play();
+                    await fadeTo(targetVolume, 200);
+                    playButton.classList.add('playing');
+                    playButton.textContent = '⏸ Pausa';
+                } catch (err) {}
+            } else {
+                await fadeTo(0, 200);
+                audioPlayer.pause();
                 playButton.classList.remove('playing');
-            });
-
-            // Inizializza
-            initGlobe();
+                playButton.textContent = '▶ Audi Canticum';
+            }
         });
+
+        volumeSlider.addEventListener('input', () => {
+            if (!audioPlayer.paused) {
+                audioPlayer.volume = parseFloat(volumeSlider.value);
+            }
+        });
+
+        updateUI(currentLang);
+        initGlobe();
     </script>
     <script src="https://cdn.counter.dev/script.js" data-id="99356092-0a36-47fb-acba-e7b5c99ca1b3" data-utcoffset="2"></script>
 </body>
