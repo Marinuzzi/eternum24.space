@@ -411,9 +411,11 @@
         }
         </script>
     <script type="module">
-        import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js';
-        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/controls/OrbitControls.js';
-
+      import * as THREE from 'three';
+      import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+      
+      
+   
         const globeContainer = document.getElementById('globeContainer');
         const tooltip = document.getElementById('tooltip');
         const playButton = document.getElementById('playButton');
@@ -561,22 +563,17 @@
             scene.add(globe);
 
             const textureLoader = new THREE.TextureLoader();
-            textureLoader.load(
-                'https://cdn.jsdelivr.net/gh/turban/webgl-earth@master/images/2_no_clouds_8k.jpg',
-                (tex) => {
-                    globeMaterial.map = tex;
-                    globeMaterial.needsUpdate = true;
-                }
-            );
-            textureLoader.load(
-                'https://cdn.jsdelivr.net/gh/turban/webgl-earth@master/images/earth_lights_lrg.jpg',
-                (tex) => {
-                    globeMaterial.emissiveMap = tex;
-                    globeMaterial.emissive = new THREE.Color(0xffaa44);
-                    globeMaterial.emissiveIntensity = 1.1;
-                    globeMaterial.needsUpdate = true;
-                }
-            );
+            textureLoader.load('textures/earth_day.jpg', (tex) => {
+                globeMaterial.map = tex;
+                globeMaterial.needsUpdate = true;
+            });
+
+            textureLoader.load('textures/earth_night.jpg', (tex) => {
+                globeMaterial.emissiveMap = tex;
+                globeMaterial.emissive = new THREE.Color(0xffffff);
+                globeMaterial.emissiveIntensity = 1.2;
+                globeMaterial.needsUpdate = true;
+            });
 
             const atmosphereGeometry = new THREE.SphereGeometry(1.62, 64, 64);
             const atmosphereMaterial = new THREE.MeshBasicMaterial({
