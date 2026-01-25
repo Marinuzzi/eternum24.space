@@ -411,6 +411,7 @@ Le stelle cadenti:
 | **Light Ray** | Raggio di luce quando si clicca |
 | **Ascending Particles** | Particelle che salgono durante la riproduzione |
 | **Globe Fade In** | Animazione di entrata del globo |
+| **Real-Time Clouds** | Nuvole reali da satellite (update ogni 3h) |
 
 ---
 
@@ -477,6 +478,29 @@ L'interfaccia si adatta alla lingua del browser:
 | Swahili | Africa Est | -11-5°N, 28-45°E |
 | Hausa | Sahel Ovest | 9-20°N, -5-15°E |
 | Lingala | Congo Basin | -6-4°N, 12-25°E |
+
+---
+
+### Real-Time Cloud Layer
+
+**Fonte:** [Matt Eason's Live Cloud Maps](https://github.com/matteason/live-cloud-maps)
+
+| Proprietà | Valore |
+|-----------|--------|
+| URL | `https://clouds.matteason.co.uk/images/2048x1024/clouds-alpha.png` |
+| Risoluzione | 2048x1024 (disponibile fino a 8K) |
+| Update | Ogni 3 ore |
+| Fonte dati | EUMETSAT satellite |
+| Costo | Gratuito |
+| CORS | Abilitato |
+
+**Implementazione:**
+- Sfera trasparente (raggio 1.56) sopra il globo (1.55)
+- Rotazione leggermente più veloce (simula pattern meteo)
+- Opacità 35% per non oscurare le città
+
+**Attribuzione richiesta:**
+> Contains modified EUMETSAT data
 
 ---
 
