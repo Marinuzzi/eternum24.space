@@ -933,6 +933,13 @@
                         </span>
                         <span class="toggle-label">☁️</span>
                     </label>
+                    <label class="compact-toggle" id="lightningToggleLabel">
+                        <span class="toggle-switch">
+                            <input type="checkbox" id="lightningToggle">
+                            <span class="toggle-slider"></span>
+                        </span>
+                        <span class="toggle-label">⚡</span>
+                    </label>
                 </div>
             </div>
             <div class="globe-container" id="globeContainer">
@@ -1695,6 +1702,152 @@
             }
         });
 
+        // Lightning - gentle divine lights from Blitzortung
+        let lightningEnabled = false;
+        let lightningWs = null;
+        const lightningFlashes = [];
+        
+        function createLightningFlash(lat, lon) {
+            if (!globe) return;
+            
+            // Convert lat/lon to 3D position (slightly above surface)
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+            const radius = 1.58;
+            
+            const x = -radius * Math.sin(phi) * Math.cos(theta);
+            const y = radius * Math.cos(phi);
+            const z = radius * Math.sin(phi) * Math.sin(theta);
+            
+            // Create soft, warm glow sprite (divine light, not harsh)
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            
+            // Soft golden/amber gradient (spiritual, warm)
+            const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+            gradient.addColorStop(0, 'rgba(255, 223, 150, 0.6)');  // Warm center
+            gradient.addColorStop(0.3, 'rgba(255, 200, 100, 0.3)');
+            gradient.addColorStop(1, 'rgba(255, 180, 80, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 64, 64);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.SpriteMaterial({
+                map: texture,
+                transparent: true,
+                opacity: 0,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            
+            const sprite = new THREE.Sprite(material);
+            sprite.position.set(x, y, z);
+            sprite.scale.set(0.15, 0.15, 1);  // Small and subtle
+            globe.add(sprite);
+            
+            // Gentle fade in and out
+            lightningFlashes.push({
+                sprite,
+                material,
+                birth: Date.now(),
+                duration: 1500  // 1.5 seconds gentle glow
+            });
+        }
+        
+        function updateLightningFlashes() {
+            const now = Date.now();
+            for (let i = lightningFlashes.length - 1; i >= 0; i--) {
+                const flash = lightningFlashes[i];
+                const age = now - flash.birth;
+                const progress = age / flash.duration;
+                
+                if (progress >= 1) {
+                    // Remove expired flash
+                    globe.remove(flash.sprite);
+                    flash.sprite.material.dispose();
+                    lightningFlashes.splice(i, 1);
+                } else {
+                    // Gentle sine wave fade (in then out)
+                    flash.material.opacity = Math.sin(progress * Math.PI) * 0.5;
+                }
+            }
+        }
+        
+        function connectLightningWebSocket() {
+            if (lightningWs) return;
+            
+            try {
+                // Blitzortung WebSocket for real-time lightning
+                lightningWs = new WebSocket('wss://ws1.blitzortung.org/');
+                
+                lightningWs.onopen = () => {
+                    console.log('⚡ Lightning WebSocket connected');
+                    // Subscribe to global lightning data
+                    lightningWs.send(JSON.stringify({
+                        "a": 111  // Request lightning strikes
+                    }));
+                };
+                
+                lightningWs.onmessage = (event) => {
+                    if (!lightningEnabled) return;
+                    
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data.lat !== undefined && data.lon !== undefined) {
+                            // Only show ~10% of strikes to keep it subtle
+                            if (Math.random() < 0.1) {
+                                createLightningFlash(data.lat, data.lon);
+                            }
+                        }
+                    } catch (e) {
+                        // Ignore parsing errors
+                    }
+                };
+                
+                lightningWs.onclose = () => {
+                    console.log('⚡ Lightning WebSocket closed');
+                    lightningWs = null;
+                    // Reconnect if still enabled
+                    if (lightningEnabled) {
+                        setTimeout(connectLightningWebSocket, 5000);
+                    }
+                };
+                
+                lightningWs.onerror = (err) => {
+                    console.warn('Lightning WebSocket error:', err);
+                };
+            } catch (e) {
+                console.warn('Failed to connect lightning WebSocket:', e);
+            }
+        }
+        
+        function disconnectLightningWebSocket() {
+            if (lightningWs) {
+                lightningWs.close();
+                lightningWs = null;
+            }
+        }
+        
+        // Lightning toggle listener
+        const lightningToggle = document.getElementById('lightningToggle');
+        lightningToggle.addEventListener('change', () => {
+            lightningEnabled = lightningToggle.checked;
+            if (lightningEnabled) {
+                connectLightningWebSocket();
+            } else {
+                disconnectLightningWebSocket();
+                // Clear existing flashes
+                lightningFlashes.forEach(f => {
+                    globe.remove(f.sprite);
+                    f.sprite.material.dispose();
+                });
+                lightningFlashes.length = 0;
+            }
+        });
+
         let savedCameraDistance = null;
 
         function enterFullscreen() {
@@ -2045,6 +2198,11 @@
                 // Rotate clouds slightly relative to earth (weather patterns drift)
                 if (clouds && clouds.visible) {
                     clouds.rotation.y += delta * 0.01; // Slow drift relative to globe
+                }
+                
+                // Update lightning flashes (gentle divine lights)
+                if (lightningEnabled) {
+                    updateLightningFlashes();
                 }
                 
                 // Update atmosphere glow view vector
