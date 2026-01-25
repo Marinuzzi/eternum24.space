@@ -982,10 +982,9 @@
         // ============================================
         // CONFIGURAZIONE API
         // ============================================
-        // Cambia questo URL quando il backend è attivo
-        // Per ora: file locali (fallback)
-        // Produzione: 'https://api.eternum24.space' o 'https://eternum24.space/api'
-        const API_BASE = ''; // Vuoto = file locali, altrimenti URL del backend
+        // '' = file locali (dev/fallback)
+        // '/api' = backend attivo (stesso dominio, no CORS)
+        const API_BASE = ''; // Cambia in '/api' quando backend è pronto
         
         // ============================================
         // PING CHECK - Kill Switch

@@ -1,42 +1,52 @@
 # Eternum24 - Backend Minimale
 
-## Struttura
+## Struttura sul Server
 
 ```
-server/
-├── main.py           # FastAPI backend
-├── requirements.txt  # Dipendenze Python
-├── deploy.sh        # Script di deploy
-└── README.md        # Questo file
+/var/www/eternum24/
+├── public/              ← Nginx serve questi (index.html, textures/)
+│   ├── index.html
+│   └── textures/
+├── audio/               ← NON pubblico! Solo via /api/audio/
+│   ├── Franciscus-de-Caelo-IT.mp3
+│   └── ...
+└── server/              ← FastAPI backend
+    ├── main.py
+    ├── requirements.txt
+    └── nginx.conf
 ```
 
-## Come funziona
+## Flusso
 
-### Kill Switch
+```
+Browser → eternum24.space/
+         ├── /           → Nginx serve index.html
+         ├── /textures/  → Nginx serve immagini
+         └── /api/*      → Nginx proxy → FastAPI:8000
+                              ├── /api/ping   → kill switch
+                              └── /api/audio/ → serve MP3
+```
 
-1. Il client chiama `/ping` all'avvio
-2. Se `SITE_ENABLED = True` → risponde `{ok: true}` → sito funziona
-3. Se `SITE_ENABLED = False` → risponde `{ok: false}` → overlay di blocco
+## Deploy Rapido
 
-### Audio Protetto
-
-- I file MP3 sono serviti da `/audio/{filename}`
-- Non sono indicizzati pubblicamente
-- URL non indovinabili senza conoscere i nomi
-
-## Deploy su Hetzner
-
-### 1. Copia i file sul server
+### 1. Copia file sul server
 
 ```bash
 # Dal tuo Mac
-scp -r server/ fra@167.235.23.19:/var/www/eternum24/
+ssh fra@167.235.23.19 "mkdir -p /var/www/eternum24/{public,audio,server}"
 
-# Copia anche i file MP3
+# File pubblici
+scp index.html fra@167.235.23.19:/var/www/eternum24/public/
+scp -r textures fra@167.235.23.19:/var/www/eternum24/public/
+
+# Audio (NON pubblico)
 scp *.mp3 fra@167.235.23.19:/var/www/eternum24/audio/
+
+# Backend
+scp -r server/* fra@167.235.23.19:/var/www/eternum24/server/
 ```
 
-### 2. Installa e avvia
+### 2. Setup sul server
 
 ```bash
 ssh fra@167.235.23.19
@@ -47,79 +57,89 @@ chmod +x deploy.sh
 
 ### 3. Configura Nginx
 
-Aggiungi al tuo nginx config:
-
-```nginx
-server {
-    server_name api.eternum24.space;  # o eternum24.space/api
-    
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
+```bash
+sudo cp nginx.conf /etc/nginx/sites-available/eternum24
+sudo ln -sf /etc/nginx/sites-available/eternum24 /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
 ```
 
-Poi: `sudo nginx -t && sudo systemctl reload nginx`
-
-### 4. Attiva HTTPS
+### 4. HTTPS
 
 ```bash
-sudo certbot --nginx -d api.eternum24.space
+sudo certbot --nginx -d eternum24.space -d www.eternum24.space
 ```
 
-### 5. Aggiorna il client
+### 5. Attiva backend nel client
 
-In `index.html`, cambia:
+In `/var/www/eternum24/public/index.html`, cambia:
 
 ```javascript
-const API_BASE = '';  // File locali
+const API_BASE = '';      // ← prima (file locali)
+const API_BASE = '/api';  // ← dopo (backend attivo)
 ```
 
-in:
-
-```javascript
-const API_BASE = 'https://api.eternum24.space';  // Backend attivo
-```
-
-## Comandi utili
+### 6. Test
 
 ```bash
-# Stato del servizio
+# Sul server
+curl http://localhost:8000/api/ping
+# → {"ok":true}
+
+# Da browser
+https://eternum24.space/api/ping
+```
+
+## Kill Switch
+
+### Bloccare il sito
+
+```bash
+ssh fra@167.235.23.19
+sudo nano /var/www/eternum24/server/main.py
+# Cambia: SITE_ENABLED = False
+sudo systemctl restart eternum24
+```
+
+### Riattivare
+
+```bash
+# Cambia: SITE_ENABLED = True
+sudo systemctl restart eternum24
+```
+
+## Comandi Utili
+
+```bash
+# Stato servizio
 sudo systemctl status eternum24
 
-# Log
+# Log in tempo reale
 sudo journalctl -u eternum24 -f
 
 # Riavvia
 sudo systemctl restart eternum24
 
-# Test locale
-curl http://localhost:8000/ping
+# Test ping
+curl -s http://localhost:8000/api/ping | jq
+
+# Test audio (primi byte)
+curl -I http://localhost:8000/api/audio/Franciscus-de-Caelo-IT.mp3
 ```
 
-## Kill Switch
+## Sicurezza
 
-Per **bloccare** il sito:
-
-1. Modifica `main.py`:
-   ```python
-   SITE_ENABLED = False
-   ```
-
-2. Riavvia:
-   ```bash
-   sudo systemctl restart eternum24
-   ```
-
-Per **riattivare**: cambia a `True` e riavvia.
+- **Audio non indicizzato**: header `X-Robots-Tag: noindex`
+- **No cache**: browser non salva i file
+- **Path traversal bloccato**: `../` non funziona
+- **Nginx non serve /audio/**: solo FastAPI può farlo
+- **Kill switch**: blocca tutto con una variabile
 
 ## Estensioni Future
 
-Il codice è predisposto per:
+Il codice è pronto per:
 
-- **Token temporanei**: aggiungi validazione in `/audio`
-- **Database licenze**: aggiungi check in `/ping`
-- **Rate limiting**: usa `slowapi` o middleware
-- **Analytics**: logga le chiamate
+- **Token temporanei**: aggiungi validazione in `/api/audio`
+- **Rate limiting**: usa `slowapi`
+- **Logging**: logga richieste per analytics
+- **Nomi file offuscati**: rinomina mp3 in hash

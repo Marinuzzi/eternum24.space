@@ -1,19 +1,33 @@
 #!/bin/bash
 # ============================================
-# Deploy script per Hetzner
+# Deploy Eternum24 su Hetzner
 # ============================================
-# Uso: scp -r server/ fra@167.235.23.19:/var/www/eternum24/
-#      ssh fra@167.235.23.19 "cd /var/www/eternum24/server && bash deploy.sh"
+# Esegui come: bash deploy.sh
+
+set -e  # Esce se un comando fallisce
 
 echo "=== Eternum24 Backend Setup ==="
+echo ""
 
-# 1. Crea directory audio se non esiste
-mkdir -p /var/www/eternum24/audio
+# 1. Crea struttura directory
+echo "[1/6] Creazione directory..."
+sudo mkdir -p /var/www/eternum24/public
+sudo mkdir -p /var/www/eternum24/audio
+sudo mkdir -p /var/www/eternum24/server
 
-# 2. Installa dipendenze Python
-pip3 install -r requirements.txt
+# 2. Copia file (se non già fatto)
+echo "[2/6] Verifica file..."
+if [ ! -f "/var/www/eternum24/server/main.py" ]; then
+    echo "  → Copia i file con: scp -r server/* fra@server:/var/www/eternum24/server/"
+fi
 
-# 3. Crea servizio systemd
+# 3. Installa dipendenze
+echo "[3/6] Installazione dipendenze Python..."
+cd /var/www/eternum24/server
+pip3 install --user -r requirements.txt 2>/dev/null || pip3 install -r requirements.txt
+
+# 4. Crea servizio systemd
+echo "[4/6] Configurazione servizio systemd..."
 sudo tee /etc/systemd/system/eternum24.service > /dev/null <<EOF
 [Unit]
 Description=Eternum24 API
@@ -21,26 +35,50 @@ After=network.target
 
 [Service]
 Type=simple
-User=fra
+User=$USER
 WorkingDirectory=/var/www/eternum24/server
 Environment="AUDIO_DIR=/var/www/eternum24/audio"
-ExecStart=/usr/local/bin/uvicorn main:app --host 127.0.0.1 --port 8000
+ExecStart=$(which uvicorn || echo "/usr/local/bin/uvicorn") main:app --host 127.0.0.1 --port 8000
 Restart=always
+RestartSec=3
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# 4. Abilita e avvia
+# 5. Abilita e avvia servizio
+echo "[5/6] Avvio servizio..."
 sudo systemctl daemon-reload
 sudo systemctl enable eternum24
-sudo systemctl start eternum24
+sudo systemctl restart eternum24
+
+# 6. Configura Nginx (se non già fatto)
+echo "[6/6] Nginx..."
+if [ ! -f "/etc/nginx/sites-available/eternum24" ]; then
+    echo "  → Copia nginx.conf:"
+    echo "    sudo cp nginx.conf /etc/nginx/sites-available/eternum24"
+    echo "    sudo ln -sf /etc/nginx/sites-available/eternum24 /etc/nginx/sites-enabled/"
+    echo "    sudo nginx -t && sudo systemctl reload nginx"
+    echo "    sudo certbot --nginx -d eternum24.space -d www.eternum24.space"
+else
+    echo "  → Nginx già configurato"
+fi
 
 echo ""
 echo "=== Setup completato ==="
-echo "Backend in esecuzione su http://127.0.0.1:8000"
+echo ""
+echo "Struttura:"
+echo "  /var/www/eternum24/"
+echo "  ├── public/      ← index.html, textures/ (Nginx serve questi)"
+echo "  ├── audio/       ← MP3 (NON pubblico, solo via API)"
+echo "  └── server/      ← FastAPI"
 echo ""
 echo "Prossimi passi:"
-echo "1. Configura nginx per proxy /api → localhost:8000"
-echo "2. Copia i file MP3 in /var/www/eternum24/audio/"
-echo "3. Testa: curl http://localhost:8000/ping"
+echo "  1. Copia index.html e textures/ in /var/www/eternum24/public/"
+echo "  2. Copia *.mp3 in /var/www/eternum24/audio/"
+echo "  3. Configura Nginx (vedi sopra)"
+echo "  4. In index.html cambia: API_BASE = '/api'"
+echo "  5. Test: curl http://localhost:8000/api/ping"
+echo ""
+echo "Kill switch: modifica SITE_ENABLED in main.py e riavvia"
+echo "  sudo systemctl restart eternum24"

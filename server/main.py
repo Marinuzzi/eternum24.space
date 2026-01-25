@@ -1,115 +1,90 @@
 """
 Eternum24 - Backend Minimale
 ============================
-Funzioni:
-  1. /ping         → health check / kill switch
-  2. /audio/{file} → serve file audio (non indicizzato)
+Endpoint:
+  /api/ping         → kill switch
+  /api/audio/{file} → serve audio (non pubblico)
 
-Per attivare/disattivare il sito:
-  - Cambia SITE_ENABLED = True/False
-  - Oppure in futuro: leggi da file/db/env
-
-Avvio:
-  pip install fastapi uvicorn
-  uvicorn main:app --host 0.0.0.0 --port 8000
+Kill switch: cambia SITE_ENABLED = False per bloccare tutto
 """
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
+from pathlib import Path
 import os
 
 app = FastAPI()
 
 # ============================================
-# CONFIGURAZIONE - Kill Switch
+# CONFIGURAZIONE
 # ============================================
-SITE_ENABLED = True  # Cambia a False per bloccare il sito
-
-# Percorso dove stanno i file audio sul server
-AUDIO_DIR = os.environ.get("AUDIO_DIR", "/var/www/eternum24/audio")
-
-# Domini autorizzati (CORS)
-ALLOWED_ORIGINS = [
-    "https://eternum24.space",
-    "https://www.eternum24.space",
-    "http://localhost:3000",  # dev
-    "http://127.0.0.1:5500",  # live server
-]
+SITE_ENABLED = True  # False = sito bloccato
+AUDIO_DIR = Path(os.environ.get("AUDIO_DIR", "/var/www/eternum24/audio"))
 
 # ============================================
-# CORS - permette al frontend di chiamare il backend
+# /api/ping - Kill Switch
 # ============================================
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_methods=["GET"],
-    allow_headers=["*"],
-)
-
-# ============================================
-# ENDPOINT: /ping - Health check / Kill switch
-# ============================================
-@app.get("/ping")
+@app.get("/api/ping")
 def ping():
     """
-    Il client chiama questo endpoint all'avvio.
-    Se ok=false, mostra overlay di blocco.
-    
-    Estendibile: in futuro puoi aggiungere:
-      - check su database
-      - verifica licenza
-      - messaggi personalizzati
+    Client chiama questo all'avvio.
+    Se ok=false → overlay di blocco.
     """
-    if SITE_ENABLED:
-        return {"ok": True}
-    else:
-        return JSONResponse(
-            status_code=200,  # 200 così il client riceve il JSON
-            content={
-                "ok": False,
-                "message": "Sito temporaneamente sospeso",
-                "contact": "johnfyrmell@gmail.com"
-            }
-        )
+    return {"ok": bool(SITE_ENABLED)}
 
 # ============================================
-# ENDPOINT: /audio/{filename} - Serve file audio
+# /api/audio/{filename} - Serve MP3
 # ============================================
-@app.get("/audio/{filename}")
-def get_audio(filename: str):
+@app.get("/api/audio/{filename}")
+def audio(filename: str):
     """
-    Serve i file audio.
-    Non sono indicizzati pubblicamente.
-    
-    Sicurezza minima:
-      - Verifica che il file esista
-      - Previene path traversal (../)
-      - In futuro: aggiungi token temporanei
+    Serve file audio.
+    - Solo se sito abilitato
+    - Blocca path traversal
+    - No cache, no index
     """
-    # Previeni path traversal
-    if ".." in filename or "/" in filename:
+    # Kill switch attivo anche per audio
+    if not SITE_ENABLED:
+        return JSONResponse({"ok": False}, status_code=403)
+
+    # Blocca path traversal (../ o simili)
+    if "/" in filename or "\\" in filename or ".." in filename:
         raise HTTPException(status_code=400, detail="Invalid filename")
-    
-    # Verifica estensione
+
+    # Solo mp3
     if not filename.endswith(".mp3"):
         raise HTTPException(status_code=400, detail="Only mp3 allowed")
-    
-    filepath = os.path.join(AUDIO_DIR, filename)
-    
-    if not os.path.exists(filepath):
-        raise HTTPException(status_code=404, detail="File not found")
-    
+
+    fpath = (AUDIO_DIR / filename).resolve()
+
+    # Verifica che il file esista
+    if not fpath.exists() or not fpath.is_file():
+        raise HTTPException(status_code=404, detail="Not found")
+
+    # Extra sicurezza: assicurati che stia dentro AUDIO_DIR
+    try:
+        fpath.relative_to(AUDIO_DIR.resolve())
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid path")
+
+    # Headers anti-cache e anti-index
+    headers = {
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0",
+        "X-Robots-Tag": "noindex, nofollow",
+    }
+
+    # FileResponse gestisce automaticamente Range requests per seek/streaming
     return FileResponse(
-        filepath,
+        path=str(fpath),
         media_type="audio/mpeg",
-        # No cache per poter revocare in futuro
-        headers={"Cache-Control": "no-store, max-age=0"}
+        headers=headers
     )
 
 # ============================================
-# ENDPOINT: / - Info
+# /api/ - Info
 # ============================================
-@app.get("/")
+@app.get("/api/")
 def root():
-    return {"service": "eternum24", "version": "1.0"}
+    return {"service": "eternum24", "status": "ok" if SITE_ENABLED else "suspended"}
