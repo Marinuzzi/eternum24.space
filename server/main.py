@@ -13,6 +13,7 @@ Avvio: uvicorn main:app --host 127.0.0.1 --port 8003
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 import os
 
@@ -22,7 +23,19 @@ app = FastAPI()
 # CONFIGURAZIONE
 # ============================================
 SITE_ENABLED = True  # False = sito bloccato
-AUDIO_DIR = Path(os.environ.get("AUDIO_DIR", "/var/www/eternum24/audio"))
+AUDIO_DIR = Path(os.environ.get("AUDIO_DIR", "/var/www/html/eternum24/audio"))
+
+# CORS per permettere chiamate da Vercel
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://eternum24.space",
+        "https://www.eternum24.space",
+        "http://localhost:3000",  # dev
+    ],
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
 
 # ============================================
 # /api/ping - Kill Switch
