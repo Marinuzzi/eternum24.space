@@ -1240,7 +1240,7 @@
         ];
 
         let currentLang = 'LT';
-        let scene, camera, renderer, globe, controls;
+        let scene, camera, renderer, globe, controls, clouds;
         let markers = [];
         let activeMarker = null;
         let activeRing = null;
@@ -1818,6 +1818,32 @@
                 globeMaterial.needsUpdate = true;
             });
 
+            // Real-time cloud layer (updates every 3 hours from matteason.co.uk)
+            const cloudGeometry = new THREE.SphereGeometry(1.56, 64, 64);
+            const cloudMaterial = new THREE.MeshPhongMaterial({
+                transparent: true,
+                opacity: 0.35,
+                depthWrite: false,
+                side: THREE.FrontSide
+            });
+            clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+            scene.add(clouds);
+            
+            // Load real-time cloud texture
+            textureLoader.load(
+                'https://clouds.matteason.co.uk/images/2048x1024/clouds-alpha.png',
+                (tex) => {
+                    cloudMaterial.map = tex;
+                    cloudMaterial.alphaMap = tex;
+                    cloudMaterial.needsUpdate = true;
+                    console.log('☁️ Real-time clouds loaded');
+                },
+                undefined,
+                (err) => {
+                    console.warn('Cloud texture failed to load, continuing without clouds');
+                }
+            );
+
             // Enhanced atmosphere with shader glow
             const innerGlow = createAtmosphereGlow();
             scene.add(innerGlow);
@@ -1997,6 +2023,11 @@
                 // Rotate starfield slowly
                 if (stars) {
                     stars.rotation.y += delta * 0.02;
+                }
+                
+                // Rotate clouds slightly faster than earth (weather patterns)
+                if (clouds) {
+                    clouds.rotation.y += delta * 0.04;
                 }
                 
                 // Update atmosphere glow view vector
