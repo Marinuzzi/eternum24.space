@@ -926,6 +926,13 @@
                         </span>
                         <span class="toggle-label">Viaggio continuo</span>
                     </label>
+                    <label class="compact-toggle" id="cloudsToggleLabel">
+                        <span class="toggle-switch">
+                            <input type="checkbox" id="cloudsToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </span>
+                        <span class="toggle-label">☁️</span>
+                    </label>
                 </div>
             </div>
             <div class="globe-container" id="globeContainer">
@@ -1680,6 +1687,14 @@
             }
         });
 
+        // Clouds toggle listener
+        const cloudsToggle = document.getElementById('cloudsToggle');
+        cloudsToggle.addEventListener('change', () => {
+            if (clouds) {
+                clouds.visible = cloudsToggle.checked;
+            }
+        });
+
         let savedCameraDistance = null;
 
         function enterFullscreen() {
@@ -1819,15 +1834,17 @@
             });
 
             // Real-time cloud layer (updates every 3 hours from matteason.co.uk)
-            const cloudGeometry = new THREE.SphereGeometry(1.56, 64, 64);
-            const cloudMaterial = new THREE.MeshPhongMaterial({
+            const cloudGeometry = new THREE.SphereGeometry(1.565, 64, 64);
+            const cloudMaterial = new THREE.MeshBasicMaterial({
                 transparent: true,
-                opacity: 0.35,
+                opacity: 0.5,
                 depthWrite: false,
-                side: THREE.FrontSide
+                blending: THREE.AdditiveBlending,
+                side: THREE.FrontSide,
+                color: 0xffffff
             });
             clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
-            scene.add(clouds);
+            globe.add(clouds); // Add to globe so it rotates with Earth
             
             // Load real-time cloud texture
             textureLoader.load(
@@ -2025,9 +2042,9 @@
                     stars.rotation.y += delta * 0.02;
                 }
                 
-                // Rotate clouds slightly faster than earth (weather patterns)
-                if (clouds) {
-                    clouds.rotation.y += delta * 0.04;
+                // Rotate clouds slightly relative to earth (weather patterns drift)
+                if (clouds && clouds.visible) {
+                    clouds.rotation.y += delta * 0.01; // Slow drift relative to globe
                 }
                 
                 // Update atmosphere glow view vector
