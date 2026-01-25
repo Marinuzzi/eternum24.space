@@ -169,6 +169,19 @@
             cursor: grab;
             border-radius: 16px;
             overflow: hidden;
+            opacity: 0;
+            animation: globeFadeIn 2s ease-out 0.5s forwards;
+        }
+
+        @keyframes globeFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .globe-container:active {
@@ -177,6 +190,63 @@
 
         .globe-container canvas {
             border-radius: 15px;
+        }
+
+        .light-ray {
+            position: absolute;
+            width: 4px;
+            height: 0;
+            background: linear-gradient(to top, rgba(244, 208, 63, 0.8), rgba(244, 208, 63, 0));
+            pointer-events: none;
+            transform: translateX(-50%);
+            opacity: 0;
+            filter: blur(1px);
+            z-index: 10;
+        }
+
+        .light-ray.active {
+            animation: rayAscend 1.5s ease-out forwards;
+        }
+
+        @keyframes rayAscend {
+            0% {
+                height: 0;
+                opacity: 0.9;
+            }
+            50% {
+                height: 150px;
+                opacity: 0.7;
+            }
+            100% {
+                height: 250px;
+                opacity: 0;
+            }
+        }
+
+        .shooting-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.6);
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .shooting-star.animate {
+            animation: shootingStar 1.2s ease-out forwards;
+        }
+
+        @keyframes shootingStar {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(200px, 150px) scale(0.3);
+            }
         }
 
         .selected-language-info {
@@ -312,6 +382,29 @@
             }
             50% { 
                 box-shadow: 0 0 50px rgba(212, 175, 55, 1);
+            }
+        }
+
+        .globe-container.audio-playing::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 320px;
+            height: 320px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: audioPulse 2s ease-in-out infinite;
+            z-index: 5;
+        }
+
+        @keyframes audioPulse {
+            0%, 100% {
+                box-shadow: 0 0 40px rgba(212, 175, 55, 0.2), 0 0 80px rgba(212, 175, 55, 0.1);
+            }
+            50% {
+                box-shadow: 0 0 60px rgba(212, 175, 55, 0.35), 0 0 120px rgba(212, 175, 55, 0.2);
             }
         }
 
@@ -475,6 +568,10 @@
         let activeMarker = null;
         let activeRing = null;
         let fadeRaf = null;
+        let stars = null;
+        let ascendingParticles = [];
+        let targetZoom = null;
+        let isAudioPlaying = false;
 
         function normalizeLon(lon) {
             let out = lon;
@@ -516,7 +613,7 @@
             return { lat, lon: normalizeLon(lon) };
         }
 
-        function createGlowSprite(color) {
+        function createGlowSprite(color, baseScale = 0.25) {
             const size = 128;
             const canvas = document.createElement('canvas');
             canvas.width = size;
@@ -531,9 +628,191 @@
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false });
             const sprite = new THREE.Sprite(material);
-            sprite.scale.set(0.25, 0.25, 0.25);
+            sprite.scale.set(baseScale, baseScale, baseScale);
+            sprite.userData.baseScale = baseScale;
+            sprite.userData.pulseOffset = Math.random() * Math.PI * 2;
             return sprite;
         }
+
+        function createStarfield() {
+            const starCount = 2000;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(starCount * 3);
+            const sizes = new Float32Array(starCount);
+            
+            for (let i = 0; i < starCount; i++) {
+                const radius = 15 + Math.random() * 35;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                
+                positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i * 3 + 2] = radius * Math.cos(phi);
+                sizes[i] = Math.random() * 2 + 0.5;
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            
+            const starTexture = createStarTexture();
+            const material = new THREE.PointsMaterial({
+                map: starTexture,
+                size: 0.15,
+                transparent: true,
+                opacity: 0.8,
+                sizeAttenuation: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending
+            });
+            
+            return new THREE.Points(geometry, material);
+        }
+
+        function createStarTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 32;
+            canvas.height = 32;
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            gradient.addColorStop(0.2, 'rgba(255, 255, 240, 0.8)');
+            gradient.addColorStop(0.5, 'rgba(255, 255, 220, 0.3)');
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 32, 32);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createAscendingParticle() {
+            const geometry = new THREE.SphereGeometry(0.02, 8, 8);
+            const material = new THREE.MeshBasicMaterial({
+                color: 0xf4d03f,
+                transparent: true,
+                opacity: 0.7
+            });
+            const particle = new THREE.Mesh(geometry, material);
+            
+            // Start position on globe surface
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            const radius = 1.6;
+            
+            particle.position.set(
+                radius * Math.sin(phi) * Math.cos(theta),
+                radius * Math.sin(phi) * Math.sin(theta),
+                radius * Math.cos(phi)
+            );
+            
+            particle.userData.velocity = new THREE.Vector3(
+                (Math.random() - 0.5) * 0.002,
+                0.008 + Math.random() * 0.006,
+                (Math.random() - 0.5) * 0.002
+            );
+            particle.userData.life = 0;
+            particle.userData.maxLife = 120 + Math.random() * 60;
+            
+            return particle;
+        }
+
+        function createAtmosphereGlow() {
+            // Inner glow
+            const innerGlowGeometry = new THREE.SphereGeometry(1.58, 64, 64);
+            const innerGlowMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    glowColor: { value: new THREE.Color(0x4a90d9) },
+                    viewVector: { value: new THREE.Vector3() }
+                },
+                vertexShader: `
+                    uniform vec3 viewVector;
+                    varying float intensity;
+                    void main() {
+                        vec3 vNormal = normalize(normalMatrix * normal);
+                        vec3 vNormel = normalize(normalMatrix * viewVector);
+                        intensity = pow(0.7 - dot(vNormal, vNormel), 2.0);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec3 glowColor;
+                    varying float intensity;
+                    void main() {
+                        vec3 glow = glowColor * intensity;
+                        gl_FragColor = vec4(glow, intensity * 0.4);
+                    }
+                `,
+                side: THREE.FrontSide,
+                blending: THREE.AdditiveBlending,
+                transparent: true,
+                depthWrite: false
+            });
+            
+            return new THREE.Mesh(innerGlowGeometry, innerGlowMaterial);
+        }
+
+        function createOuterGlow() {
+            const glowGeometry = new THREE.SphereGeometry(1.75, 64, 64);
+            const glowMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    glowColor: { value: new THREE.Color(0x3a7bd5) },
+                    viewVector: { value: new THREE.Vector3() }
+                },
+                vertexShader: `
+                    uniform vec3 viewVector;
+                    varying float intensity;
+                    void main() {
+                        vec3 vNormal = normalize(normalMatrix * normal);
+                        vec3 vNormel = normalize(normalMatrix * viewVector);
+                        intensity = pow(0.6 - dot(vNormal, vNormel), 1.5);
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec3 glowColor;
+                    varying float intensity;
+                    void main() {
+                        vec3 glow = glowColor * intensity;
+                        gl_FragColor = vec4(glow, intensity * 0.25);
+                    }
+                `,
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending,
+                transparent: true,
+                depthWrite: false
+            });
+            
+            return new THREE.Mesh(glowGeometry, glowMaterial);
+        }
+
+        function triggerLightRay(screenX, screenY) {
+            const ray = document.createElement('div');
+            ray.className = 'light-ray';
+            ray.style.left = `${screenX}px`;
+            ray.style.top = `${screenY}px`;
+            globeContainer.appendChild(ray);
+            
+            requestAnimationFrame(() => ray.classList.add('active'));
+            
+            setTimeout(() => ray.remove(), 1600);
+        }
+
+        function triggerShootingStar() {
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+            star.style.left = `${Math.random() * 60 + 10}%`;
+            star.style.top = `${Math.random() * 30 + 5}%`;
+            globeContainer.appendChild(star);
+            
+            requestAnimationFrame(() => star.classList.add('animate'));
+            
+            setTimeout(() => star.remove(), 1300);
+        }
+
+        // Occasional shooting stars
+        setInterval(() => {
+            if (Math.random() < 0.3) {
+                triggerShootingStar();
+            }
+        }, 4000);
 
         function initGlobe() {
             const width = globeContainer.clientWidth;
@@ -548,11 +827,20 @@
             renderer.setSize(width, height);
             globeContainer.appendChild(renderer.domElement);
 
+            // Starfield background
+            stars = createStarfield();
+            scene.add(stars);
+
             const ambientLight = new THREE.AmbientLight(0x222222, 1.2);
             scene.add(ambientLight);
             const pointLight = new THREE.PointLight(0xffffff, 1.6);
             pointLight.position.set(5, 3, 5);
             scene.add(pointLight);
+
+            // Divine light from above
+            const divineLight = new THREE.PointLight(0xf4d03f, 0.4);
+            divineLight.position.set(0, 8, 0);
+            scene.add(divineLight);
 
             const globeGeometry = new THREE.SphereGeometry(1.55, 64, 64);
             const globeMaterial = new THREE.MeshPhongMaterial({
@@ -576,27 +864,36 @@
                 globeMaterial.needsUpdate = true;
             });
 
+            // Enhanced atmosphere with shader glow
+            const innerGlow = createAtmosphereGlow();
+            scene.add(innerGlow);
+            
+            const outerGlow = createOuterGlow();
+            scene.add(outerGlow);
+
+            // Keep simple atmosphere as backup
             const atmosphereGeometry = new THREE.SphereGeometry(1.62, 64, 64);
             const atmosphereMaterial = new THREE.MeshBasicMaterial({
                 color: 0x2b6cb0,
                 transparent: true,
-                opacity: 0.08,
+                opacity: 0.05,
                 side: THREE.BackSide
             });
             const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
             scene.add(atmosphere);
 
+            // Language markers with pulsing
             Object.entries(LANGUAGES).forEach(([code, lang]) => {
                 const pos = latLonToVector3(lang.marker.lat, lang.marker.lon, 1.57);
-                const glow = createGlowSprite(new THREE.Color(0xd4af37));
+                const glow = createGlowSprite(new THREE.Color(0xd4af37), 0.25);
                 glow.position.copy(pos);
-                glow.userData = { code };
+                glow.userData.code = code;
                 globe.add(glow);
                 markers.push(glow);
             });
 
-            activeMarker = createGlowSprite(new THREE.Color(0xf4d03f));
-            activeMarker.scale.set(0.35, 0.35, 0.35);
+            activeMarker = createGlowSprite(new THREE.Color(0xf4d03f), 0.35);
+            activeMarker.userData.baseScale = 0.35;
             globe.add(activeMarker);
             activeMarker.visible = false;
 
@@ -662,6 +959,12 @@
                 const langKey = getLanguageForLatLon(lat, lon);
                 if (!langKey) return;
 
+                // Light ray effect
+                triggerLightRay(event.clientX - rect.left, event.clientY - rect.top);
+                
+                // Smooth zoom towards clicked point
+                targetZoom = 3.4;
+                
                 playLanguage(langKey, point);
             }
 
@@ -681,9 +984,82 @@
             });
 
             const clock = new THREE.Clock();
+            let time = 0;
+            
             function animate() {
-                clock.getDelta();
+                const delta = clock.getDelta();
+                time += delta;
+                
                 controls.update();
+                
+                // Rotate starfield slowly
+                if (stars) {
+                    stars.rotation.y += delta * 0.02;
+                }
+                
+                // Update atmosphere glow view vector
+                scene.children.forEach(child => {
+                    if (child.material && child.material.uniforms && child.material.uniforms.viewVector) {
+                        child.material.uniforms.viewVector.value = camera.position.clone().sub(child.position);
+                    }
+                });
+                
+                // Pulsing markers
+                markers.forEach(marker => {
+                    if (marker.userData.baseScale) {
+                        const pulse = Math.sin(time * 2 + marker.userData.pulseOffset) * 0.05 + 1;
+                        const scale = marker.userData.baseScale * pulse;
+                        marker.scale.set(scale, scale, scale);
+                    }
+                });
+                
+                // Active marker pulse (faster)
+                if (activeMarker && activeMarker.visible && activeMarker.userData.baseScale) {
+                    const pulse = Math.sin(time * 4) * 0.08 + 1;
+                    const scale = activeMarker.userData.baseScale * pulse;
+                    activeMarker.scale.set(scale, scale, scale);
+                }
+                
+                // Active ring rotation
+                if (activeRing && activeRing.visible) {
+                    activeRing.rotation.z += delta * 0.5;
+                }
+                
+                // Ascending particles
+                if (isAudioPlaying && ascendingParticles.length < 15 && Math.random() < 0.08) {
+                    const particle = createAscendingParticle();
+                    scene.add(particle);
+                    ascendingParticles.push(particle);
+                }
+                
+                for (let i = ascendingParticles.length - 1; i >= 0; i--) {
+                    const p = ascendingParticles[i];
+                    p.position.add(p.userData.velocity);
+                    p.userData.life++;
+                    
+                    const lifeRatio = p.userData.life / p.userData.maxLife;
+                    p.material.opacity = 0.7 * (1 - lifeRatio);
+                    
+                    if (p.userData.life >= p.userData.maxLife) {
+                        scene.remove(p);
+                        p.geometry.dispose();
+                        p.material.dispose();
+                        ascendingParticles.splice(i, 1);
+                    }
+                }
+                
+                // Smooth zoom
+                if (targetZoom !== null) {
+                    const currentDist = camera.position.length();
+                    const diff = targetZoom - currentDist;
+                    if (Math.abs(diff) > 0.01) {
+                        const newDist = currentDist + diff * 0.05;
+                        camera.position.normalize().multiplyScalar(newDist);
+                    } else {
+                        targetZoom = null;
+                    }
+                }
+                
                 renderer.render(scene, camera);
                 requestAnimationFrame(animate);
             }
@@ -745,10 +1121,20 @@
                 await fadeTo(targetVolume, 200);
                 playButton.classList.add('playing');
                 playButton.textContent = '⏸ Pausa';
+                isAudioPlaying = true;
+                globeContainer.classList.add('audio-playing');
             } catch (err) {
                 // No autoplay unless user clicks; ignore if blocked.
             }
         }
+
+        // Audio ended listener
+        audioPlayer.addEventListener('ended', () => {
+            isAudioPlaying = false;
+            globeContainer.classList.remove('audio-playing');
+            playButton.classList.remove('playing');
+            playButton.textContent = '▶ Audi Canticum';
+        });
 
         playButton.addEventListener('click', async () => {
             const targetVolume = parseFloat(volumeSlider.value);
@@ -761,12 +1147,16 @@
                     await fadeTo(targetVolume, 200);
                     playButton.classList.add('playing');
                     playButton.textContent = '⏸ Pausa';
+                    isAudioPlaying = true;
+                    globeContainer.classList.add('audio-playing');
                 } catch (err) {}
             } else {
                 await fadeTo(0, 200);
                 audioPlayer.pause();
                 playButton.classList.remove('playing');
                 playButton.textContent = '▶ Audi Canticum';
+                isAudioPlaying = false;
+                globeContainer.classList.remove('audio-playing');
             }
         });
 
