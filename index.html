@@ -1473,6 +1473,9 @@
                 }
             }
 
+            let zoomBackTimeout = null;
+            const fullscreenZoomDistance = 4.2 * 1.25; // Same as enterFullscreen calculation
+
             function onClick(event) {
                 const rect = isFullscreen ? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight } : globeContainer.getBoundingClientRect();
                 
@@ -1492,8 +1495,22 @@
                     triggerLightRay(event.clientX - rect.left, event.clientY - rect.top);
                 }
                 
+                // Clear any pending zoom-back
+                if (zoomBackTimeout) {
+                    clearTimeout(zoomBackTimeout);
+                    zoomBackTimeout = null;
+                }
+                
                 // Smooth zoom towards clicked point
                 targetZoom = 3.4;
+                
+                // In fullscreen, zoom back out after 3 seconds
+                if (isFullscreen) {
+                    zoomBackTimeout = setTimeout(() => {
+                        targetZoom = fullscreenZoomDistance;
+                        zoomBackTimeout = null;
+                    }, 3000);
+                }
                 
                 playLanguage(langKey, point);
             }
