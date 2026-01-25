@@ -333,28 +333,70 @@
 
         .shooting-star {
             position: absolute;
-            width: 2px;
-            height: 2px;
+            width: 4px;
+            height: 4px;
             background: #fff;
             border-radius: 50%;
-            box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.6);
-            pointer-events: none;
+            box-shadow: 0 0 8px 3px rgba(255, 255, 255, 0.8);
+            pointer-events: auto;
+            cursor: pointer;
             opacity: 0;
+            z-index: 100;
+        }
+
+        .shooting-star:hover {
+            box-shadow: 0 0 15px 5px rgba(255, 255, 200, 1);
         }
 
         .shooting-star.animate {
-            animation: shootingStar 1.2s ease-out forwards;
+            animation: shootingStarCurve 2s ease-in-out forwards;
         }
 
-        @keyframes shootingStar {
+        @keyframes shootingStarCurve {
             0% {
                 opacity: 1;
-                transform: translate(0, 0) scale(1);
+                transform: translate(0, 0) rotate(0deg) scale(1);
+            }
+            25% {
+                opacity: 1;
+                transform: translate(60px, 30px) rotate(15deg) scale(0.9);
+            }
+            50% {
+                opacity: 0.8;
+                transform: translate(140px, 80px) rotate(-10deg) scale(0.7);
+            }
+            75% {
+                opacity: 0.5;
+                transform: translate(200px, 100px) rotate(20deg) scale(0.5);
             }
             100% {
                 opacity: 0;
-                transform: translate(200px, 150px) scale(0.3);
+                transform: translate(280px, 140px) rotate(-5deg) scale(0.2);
             }
+        }
+
+        .easter-egg-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 15px 30px;
+            background: rgba(10, 15, 25, 0.95);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            border-radius: 12px;
+            color: #d4af37;
+            font-size: 1.1em;
+            font-style: italic;
+            z-index: 10010;
+            opacity: 0;
+            transition: all 0.5s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .easter-egg-toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
 
         .selected-language-info {
@@ -733,33 +775,6 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="spiritual-symbol">
-                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="doveGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" style="stop-color:#f4d03f"/>
-                            <stop offset="100%" style="stop-color:#b8960b"/>
-                        </linearGradient>
-                        <filter id="glow">
-                            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                        </filter>
-                    </defs>
-                    <ellipse cx="50" cy="55" rx="12" ry="18" fill="url(#doveGrad)" filter="url(#glow)"/>
-                    <circle cx="50" cy="40" r="10" fill="url(#doveGrad)" filter="url(#glow)"/>
-                    <path d="M 38 50 Q 20 35 15 42 Q 22 50 38 60 Z" fill="url(#doveGrad)" filter="url(#glow)"/>
-                    <path d="M 62 50 Q 80 35 85 42 Q 78 50 62 60 Z" fill="url(#doveGrad)" filter="url(#glow)"/>
-                    <line x1="50" y1="25" x2="50" y2="10" stroke="#f4d03f" stroke-width="2" opacity="0.7"/>
-                    <line x1="40" y1="28" x2="35" y2="15" stroke="#f4d03f" stroke-width="1.5" opacity="0.5"/>
-                    <line x1="60" y1="28" x2="65" y2="15" stroke="#f4d03f" stroke-width="1.5" opacity="0.5"/>
-                </svg>
-            </div>
-            <h1>In Vitam Aeternam</h1>
-            <h2>Papae Francisci</h2>
-            <div class="dates">MCMXXXVI – MMXXV</div>
-        </div>
-
         <div class="world-section">
             <div class="globe-header">
                 <div class="globe-header-left">
@@ -776,13 +791,13 @@
                         <span>🔊</span>
                         <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.8" />
                     </div>
-                    <div class="compact-toggle">
+                    <label class="compact-toggle">
                         <span class="toggle-switch">
                             <input type="checkbox" id="continuousToggle">
                             <span class="toggle-slider"></span>
                         </span>
                         <span class="toggle-label">Viaggio continuo</span>
-                    </div>
+                    </label>
                 </div>
             </div>
             <div class="globe-container" id="globeContainer">
@@ -1148,21 +1163,43 @@
             setTimeout(() => ray.remove(), 1600);
         }
 
+        // Easter egg toast
+        function showEasterEgg(message) {
+            let toast = document.getElementById('easterEggToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'easterEggToast';
+                toast.className = 'easter-egg-toast';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.classList.add('visible');
+            setTimeout(() => toast.classList.remove('visible'), 3500);
+        }
+
         function triggerShootingStar() {
             const star = document.createElement('div');
             star.className = 'shooting-star';
-            star.style.left = `${Math.random() * 60 + 10}%`;
-            star.style.top = `${Math.random() * 30 + 5}%`;
+            star.style.left = `${Math.random() * 50 + 5}%`;
+            star.style.top = `${Math.random() * 25 + 3}%`;
+            
+            // Easter egg: click on shooting star
+            star.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showEasterEgg('✨ Credit by John Fyrmell ✨');
+                star.remove();
+            });
+            
             globeContainer.appendChild(star);
             
             requestAnimationFrame(() => star.classList.add('animate'));
             
-            setTimeout(() => star.remove(), 1300);
+            setTimeout(() => star.remove(), 2100);
         }
 
-        // Occasional shooting stars
+        // Occasional shooting stars (reduced frequency by 20%)
         setInterval(() => {
-            if (Math.random() < 0.3) {
+            if (Math.random() < 0.24) {
                 triggerShootingStar();
             }
         }, 4000);
@@ -1517,6 +1554,13 @@
 
                 const point = intersects[0].point;
                 const { lat, lon } = vector3ToLatLon(point);
+                
+                // Easter egg: Hawaii (lat 18-23, lon -160 to -154)
+                if (lat >= 18 && lat <= 24 && lon >= -162 && lon <= -152) {
+                    showEasterEgg('🌺 Done by J.F. - 2025 🌺');
+                    return;
+                }
+                
                 const langKey = getLanguageForLatLon(lat, lon);
                 if (!langKey) return;
 
