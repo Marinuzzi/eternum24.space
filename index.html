@@ -1745,7 +1745,7 @@
             
             const sprite = new THREE.Sprite(material);
             sprite.position.set(x, y, z);
-            sprite.scale.set(0.15, 0.15, 1);  // Small and subtle
+            sprite.scale.set(0.2, 0.2, 1);  // Visible but not aggressive
             globe.add(sprite);
             
             // Gentle fade in and out
@@ -1771,7 +1771,7 @@
                     lightningFlashes.splice(i, 1);
                 } else {
                     // Gentle sine wave fade (in then out)
-                    flash.material.opacity = Math.sin(progress * Math.PI) * 0.5;
+                    flash.material.opacity = Math.sin(progress * Math.PI) * 0.7;
                 }
             }
         }
@@ -1797,8 +1797,10 @@
             if (lightningWs || lightningConnectionFailed) return;
             
             try {
-                // Blitzortung WebSocket for real-time lightning
-                lightningWs = new WebSocket('wss://ws1.blitzortung.org/');
+                // Blitzortung WebSocket - random server (1, 5, 6, or 7) on port 3000
+                const serverIds = [1, 5, 6, 7];
+                const serverId = serverIds[Math.floor(Math.random() * serverIds.length)];
+                lightningWs = new WebSocket(`wss://ws${serverId}.blitzortung.org:3000/`);
                 
                 // Timeout: if no connection in 8 seconds, disable
                 lightningConnectTimeout = setTimeout(() => {
@@ -1815,11 +1817,9 @@
                 
                 lightningWs.onopen = () => {
                     clearTimeout(lightningConnectTimeout);
-                    console.log('⚡ Lightning WebSocket connected');
-                    // Subscribe to global lightning data
-                    lightningWs.send(JSON.stringify({
-                        "a": 111  // Request lightning strikes
-                    }));
+                    console.log('⚡ Lightning WebSocket connected to ws' + serverId);
+                    // Request lightning data stream
+                    lightningWs.send(JSON.stringify({ time: 0 }));
                 };
                 
                 lightningWs.onmessage = (event) => {
@@ -1828,8 +1828,8 @@
                     try {
                         const data = JSON.parse(event.data);
                         if (data.lat !== undefined && data.lon !== undefined) {
-                            // Only show ~10% of strikes to keep it subtle
-                            if (Math.random() < 0.1) {
+                            // Only show ~20% of strikes to keep it subtle but visible
+                            if (Math.random() < 0.2) {
                                 createLightningFlash(data.lat, data.lon);
                             }
                         }
