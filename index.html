@@ -356,6 +356,103 @@
             accent-color: #d4af37;
         }
 
+        .continuous-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .continuous-toggle label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            color: #93a0b8;
+            font-size: 1em;
+            transition: color 0.3s ease;
+        }
+
+        .continuous-toggle label:hover {
+            color: #d4af37;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(60, 70, 90, 0.5);
+            border: 1px solid rgba(100, 120, 160, 0.3);
+            border-radius: 26px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-slider::before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: #8a93a6;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: rgba(212, 175, 55, 0.3);
+            border-color: rgba(212, 175, 55, 0.6);
+        }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(24px);
+            background: #d4af37;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+        }
+
+        .continuous-info {
+            margin-top: 15px;
+            padding: 12px 20px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            border-radius: 10px;
+            color: #c9b38b;
+            font-size: 0.95em;
+            font-style: italic;
+            display: none;
+        }
+
+        .continuous-info.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .continuous-info .repeat-indicator {
+            color: #d4af37;
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .tooltip {
             position: absolute;
             padding: 8px 12px;
@@ -660,6 +757,18 @@
             <audio id="audioPlayer" preload="none">
                 <source id="audioSource" src="Franciscus-de-Caelo-LT.mp3" type="audio/mpeg">
             </audio>
+            <div class="continuous-toggle">
+                <label>
+                    <span class="toggle-switch">
+                        <input type="checkbox" id="continuousToggle">
+                        <span class="toggle-slider"></span>
+                    </span>
+                    Modalità continua — viaggia intorno al mondo
+                </label>
+            </div>
+            <div class="continuous-info" id="continuousInfo">
+                <span id="continuousStatus">In attesa...</span>
+            </div>
         </div>
 
         <footer>
@@ -761,6 +870,14 @@
         let targetZoom = null;
         let isAudioPlaying = false;
         let isFullscreen = false;
+        let isContinuousMode = false;
+        let continuousRepeatCount = 0;
+        let continuousCurrentRepeat = 0;
+
+        // Continuous mode elements
+        const continuousToggle = document.getElementById('continuousToggle');
+        const continuousInfo = document.getElementById('continuousInfo');
+        const continuousStatus = document.getElementById('continuousStatus');
 
         // Fullscreen elements
         const fullscreenBtn = document.getElementById('fullscreenBtn');
@@ -1019,6 +1136,115 @@
                 triggerShootingStar();
             }
         }, 4000);
+
+        // Continuous mode functions
+        function getVisibleCenterLonLat() {
+            // Get the camera's position relative to the globe
+            // The OrbitControls rotates around the center, so we need to find
+            // what part of the globe is facing the camera
+            
+            // Camera looks at origin (0,0,0), so the center of view is opposite to camera position
+            const camPos = camera.position.clone().normalize();
+            
+            // Convert camera direction to lat/lon (what's facing the camera)
+            const lat = 90 - THREE.MathUtils.radToDeg(Math.acos(camPos.y));
+            const theta = THREE.MathUtils.radToDeg(Math.atan2(camPos.z, -camPos.x));
+            // Negate and shift because we want what's facing the camera
+            const lon = normalizeLon(-theta + 180);
+            
+            return { lat, lon };
+        }
+
+        function getLanguageForVisibleRegion() {
+            const { lat, lon } = getVisibleCenterLonLat();
+            
+            // Try to find a language in the visible area
+            // Check in a wider area around the center
+            const searchRadius = 40; // degrees
+            
+            for (let dLat = 0; dLat <= searchRadius; dLat += 10) {
+                for (let dLon = 0; dLon <= searchRadius; dLon += 10) {
+                    // Check multiple points around the center
+                    const points = [
+                        { lt: lat + dLat, ln: lon + dLon },
+                        { lt: lat + dLat, ln: lon - dLon },
+                        { lt: lat - dLat, ln: lon + dLon },
+                        { lt: lat - dLat, ln: lon - dLon },
+                    ];
+                    
+                    for (const pt of points) {
+                        const langKey = getLanguageForLatLon(pt.lt, pt.ln);
+                        if (langKey && langKey !== currentLang) {
+                            return langKey;
+                        }
+                    }
+                }
+            }
+            
+            // If nothing found, pick a random different language
+            const keys = Object.keys(LANGUAGES).filter(k => k !== currentLang);
+            return keys[Math.floor(Math.random() * keys.length)];
+        }
+
+        function startContinuousMode() {
+            isContinuousMode = true;
+            continuousInfo.classList.add('active');
+            continuousRepeatCount = Math.floor(Math.random() * 3) + 1; // 1-3 repeats
+            continuousCurrentRepeat = 0;
+            updateContinuousStatus();
+            
+            // Start playing if not already
+            if (audioPlayer.paused) {
+                playLanguage(currentLang, null);
+            }
+        }
+
+        function stopContinuousMode() {
+            isContinuousMode = false;
+            continuousInfo.classList.remove('active');
+        }
+
+        function updateContinuousStatus() {
+            const lang = LANGUAGES[currentLang];
+            const remaining = continuousRepeatCount - continuousCurrentRepeat;
+            if (remaining > 1) {
+                continuousStatus.innerHTML = `<span class="repeat-indicator">${lang.native}</span> — ascolto ${continuousCurrentRepeat + 1}/${continuousRepeatCount}`;
+            } else {
+                continuousStatus.innerHTML = `<span class="repeat-indicator">${lang.native}</span> — ultimo ascolto, poi nuova destinazione...`;
+            }
+        }
+
+        async function handleContinuousModeEnd() {
+            continuousCurrentRepeat++;
+            
+            if (continuousCurrentRepeat < continuousRepeatCount) {
+                // Repeat the same song
+                updateContinuousStatus();
+                audioPlayer.currentTime = 0;
+                audioPlayer.play();
+            } else {
+                // Move to next language based on visible region
+                const nextLang = getLanguageForVisibleRegion();
+                continuousRepeatCount = Math.floor(Math.random() * 3) + 1;
+                continuousCurrentRepeat = 0;
+                
+                // Get marker position for the new language
+                const langData = LANGUAGES[nextLang];
+                const markerPos = latLonToVector3(langData.marker.lat, langData.marker.lon, 1.57);
+                
+                await playLanguage(nextLang, markerPos);
+                updateContinuousStatus();
+            }
+        }
+
+        // Continuous mode toggle listener
+        continuousToggle.addEventListener('change', () => {
+            if (continuousToggle.checked) {
+                startContinuousMode();
+            } else {
+                stopContinuousMode();
+            }
+        });
 
         function enterFullscreen() {
             if (isFullscreen) return;
@@ -1429,6 +1655,11 @@
                 playButton.textContent = '⏸ Pausa';
                 isAudioPlaying = true;
                 globeContainer.classList.add('audio-playing');
+                
+                // Update continuous mode status if active
+                if (isContinuousMode) {
+                    updateContinuousStatus();
+                }
             } catch (err) {
                 // No autoplay unless user clicks; ignore if blocked.
             }
@@ -1436,10 +1667,15 @@
 
         // Audio ended listener
         audioPlayer.addEventListener('ended', () => {
-            isAudioPlaying = false;
-            globeContainer.classList.remove('audio-playing');
-            playButton.classList.remove('playing');
-            playButton.textContent = '▶ Audi Canticum';
+            if (isContinuousMode) {
+                // Handle continuous mode
+                handleContinuousModeEnd();
+            } else {
+                isAudioPlaying = false;
+                globeContainer.classList.remove('audio-playing');
+                playButton.classList.remove('playing');
+                playButton.textContent = '▶ Audi Canticum';
+            }
         });
 
         playButton.addEventListener('click', async () => {
@@ -1455,6 +1691,11 @@
                     playButton.textContent = '⏸ Pausa';
                     isAudioPlaying = true;
                     globeContainer.classList.add('audio-playing');
+                    
+                    // Update continuous mode status if active
+                    if (isContinuousMode) {
+                        updateContinuousStatus();
+                    }
                 } catch (err) {}
             } else {
                 await fadeTo(0, 200);
@@ -1463,6 +1704,12 @@
                 playButton.textContent = '▶ Audi Canticum';
                 isAudioPlaying = false;
                 globeContainer.classList.remove('audio-playing');
+                
+                // Disable continuous mode when manually pausing
+                if (isContinuousMode) {
+                    continuousToggle.checked = false;
+                    stopContinuousMode();
+                }
             }
         });
 
