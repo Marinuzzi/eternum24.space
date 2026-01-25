@@ -22,9 +22,11 @@
 Browser → eternum24.space/
          ├── /           → Nginx serve index.html
          ├── /textures/  → Nginx serve immagini
-         └── /api/*      → Nginx proxy → FastAPI:8000
+         └── /api/*      → Nginx proxy → FastAPI:8003
                               ├── /api/ping   → kill switch
                               └── /api/audio/ → serve MP3
+
+NOTA: Porta 8003 perché 8000-8002 sono usate da pigna
 ```
 
 ## Deploy Rapido
@@ -83,7 +85,7 @@ const API_BASE = '/api';  // ← dopo (backend attivo)
 
 ```bash
 # Sul server
-curl http://localhost:8000/api/ping
+curl http://localhost:8003/api/ping
 # → {"ok":true}
 
 # Da browser
@@ -121,10 +123,10 @@ sudo journalctl -u eternum24 -f
 sudo systemctl restart eternum24
 
 # Test ping
-curl -s http://localhost:8000/api/ping | jq
+curl -s http://localhost:8003/api/ping | jq
 
 # Test audio (primi byte)
-curl -I http://localhost:8000/api/audio/Franciscus-de-Caelo-IT.mp3
+curl -I http://localhost:8003/api/audio/Franciscus-de-Caelo-IT.mp3
 ```
 
 ## Sicurezza

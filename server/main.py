@@ -6,6 +6,9 @@ Endpoint:
   /api/audio/{file} → serve audio (non pubblico)
 
 Kill switch: cambia SITE_ENABLED = False per bloccare tutto
+
+NOTA: Gira su porta 8003 (8000-8002 occupate da pigna)
+Avvio: uvicorn main:app --host 127.0.0.1 --port 8003
 """
 
 from fastapi import FastAPI, HTTPException

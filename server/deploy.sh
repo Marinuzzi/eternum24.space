@@ -2,11 +2,17 @@
 # ============================================
 # Deploy Eternum24 su Hetzner
 # ============================================
+# SICURO: non tocca servizi esistenti (pigna, etc.)
+# USA PORTA 8003 (8000-8002 già occupate)
 # Esegui come: bash deploy.sh
 
 set -e  # Esce se un comando fallisce
 
 echo "=== Eternum24 Backend Setup ==="
+echo ""
+echo "NOTA: Questo script crea UN NUOVO servizio (eternum24)"
+echo "      Non modifica: pigna-backend, pigna-flow, pigna-staging"
+echo "      Usa porta: 8003"
 echo ""
 
 # 1. Crea struttura directory
@@ -38,7 +44,7 @@ Type=simple
 User=$USER
 WorkingDirectory=/var/www/eternum24/server
 Environment="AUDIO_DIR=/var/www/eternum24/audio"
-ExecStart=$(which uvicorn || echo "/usr/local/bin/uvicorn") main:app --host 127.0.0.1 --port 8000
+ExecStart=$(which uvicorn || echo "/usr/local/bin/uvicorn") main:app --host 127.0.0.1 --port 8003
 Restart=always
 RestartSec=3
 
@@ -71,14 +77,17 @@ echo "Struttura:"
 echo "  /var/www/eternum24/"
 echo "  ├── public/      ← index.html, textures/ (Nginx serve questi)"
 echo "  ├── audio/       ← MP3 (NON pubblico, solo via API)"
-echo "  └── server/      ← FastAPI"
+echo "  └── server/      ← FastAPI (porta 8003)"
 echo ""
 echo "Prossimi passi:"
 echo "  1. Copia index.html e textures/ in /var/www/eternum24/public/"
 echo "  2. Copia *.mp3 in /var/www/eternum24/audio/"
-echo "  3. Configura Nginx (vedi sopra)"
+echo "  3. Configura Nginx (AGGIUNGI site, non sostituire!)"
 echo "  4. In index.html cambia: API_BASE = '/api'"
-echo "  5. Test: curl http://localhost:8000/api/ping"
+echo "  5. Test: curl http://localhost:8003/api/ping"
+echo ""
+echo "⚠️  ATTENZIONE: Nginx va configurato AGGIUNGENDO un site,"
+echo "    non modificando quelli esistenti (pigna, flow, etc.)"
 echo ""
 echo "Kill switch: modifica SITE_ENABLED in main.py e riavvia"
 echo "  sudo systemctl restart eternum24"
