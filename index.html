@@ -145,20 +145,128 @@
                 inset 0 0 60px rgba(80, 110, 170, 0.08);
         }
 
+        .globe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .globe-header-left {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .globe-header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
         .map-title {
-            font-size: 1.6em;
+            font-size: 1.4em;
             color: #d4af37;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
             font-style: italic;
             text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
-            letter-spacing: 2px;
+            letter-spacing: 1px;
         }
 
         .map-subtitle {
-            font-size: 1.1em;
+            font-size: 0.95em;
             color: #93a0b8;
-            margin-bottom: 25px;
             font-style: italic;
+        }
+
+        .compact-play-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #8b6914 0%, #d4af37 50%, #8b6914 100%);
+            color: #1a0a0a;
+            font-size: 1.1em;
+            border: none;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .compact-play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
+        }
+
+        .compact-play-btn.playing {
+            animation: buttonPulse 2s ease-in-out infinite;
+        }
+
+        .compact-volume {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #93a0b8;
+            font-size: 0.85em;
+        }
+
+        .compact-volume input[type="range"] {
+            width: 80px;
+            accent-color: #d4af37;
+        }
+
+        .compact-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .compact-toggle .toggle-label {
+            color: #93a0b8;
+            font-size: 0.8em;
+            max-width: 90px;
+            line-height: 1.2;
+        }
+
+        .compact-toggle .toggle-switch {
+            width: 40px;
+            height: 22px;
+        }
+
+        .compact-toggle .toggle-slider::before {
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+        }
+
+        .compact-toggle .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(18px);
+        }
+
+        .language-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(80, 110, 170, 0.15);
+            border-radius: 20px;
+            border: 1px solid rgba(80, 110, 170, 0.25);
+        }
+
+        .language-display .lang-label {
+            font-size: 0.75em;
+            color: #8a93a6;
+        }
+
+        .language-display .lang-name {
+            font-size: 0.95em;
+            color: #d4af37;
+            font-weight: 600;
         }
 
         .globe-container {
@@ -250,110 +358,35 @@
         }
 
         .selected-language-info {
-            margin-top: 20px;
-            padding: 15px 25px;
-            background: rgba(80, 110, 170, 0.12);
-            border-radius: 12px;
-            border: 1px solid rgba(80, 110, 170, 0.25);
-            display: inline-block;
-            min-width: 240px;
+            display: none; /* Hidden - using compact display in header */
         }
 
-        .selected-language-info .label {
-            font-size: 0.9em;
-            color: #93a0b8;
-            margin-bottom: 5px;
+        .continuous-info {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            color: #c9b38b;
+            font-size: 0.85em;
+            font-style: italic;
+            display: none;
+            text-align: center;
         }
 
-        .selected-language-info .language-name {
-            font-size: 1.5em;
+        .continuous-info.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .continuous-info .repeat-indicator {
             color: #d4af37;
             font-weight: 600;
         }
 
+        /* Hidden - controls moved to header */
         .audio-controls {
-            margin: 40px 0;
-            padding: 35px;
-            background: linear-gradient(135deg, rgba(8, 10, 18, 0.95) 0%, rgba(12, 16, 28, 0.98) 100%);
-            border-radius: 20px;
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            box-shadow: 
-                0 10px 40px rgba(0, 0, 0, 0.8),
-                inset 0 0 60px rgba(80, 110, 170, 0.08);
-        }
-
-        .current-language {
-            font-size: 1.6em;
-            color: #d4af37;
-            margin-bottom: 20px;
-            font-style: italic;
-            text-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
-            letter-spacing: 2px;
-        }
-
-        .instructions {
-            font-style: italic;
-            margin: 15px 0;
-            color: #93a0b8;
-            font-size: 1.1em;
-        }
-
-        .play-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: linear-gradient(135deg, #8b6914 0%, #d4af37 30%, #f4d03f 50%, #d4af37 70%, #8b6914 100%);
-            background-size: 200% 200%;
-            color: #1a0a0a;
-            padding: 16px 34px;
-            font-size: 1.2em;
-            font-family: 'Cinzel', serif;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            margin: 18px 0;
-            border-radius: 999px;
-            transition: all 0.3s ease;
-            box-shadow: 
-                0 6px 20px rgba(212, 175, 55, 0.5),
-                inset 0 2px 10px rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-            letter-spacing: 2px;
-        }
-
-        .play-button:hover {
-            transform: scale(1.05);
-            box-shadow: 
-                0 8px 30px rgba(212, 175, 55, 0.7),
-                inset 0 2px 15px rgba(255, 255, 255, 0.3);
-            background-position: 100% 0;
-        }
-
-        .play-button.playing {
-            background: linear-gradient(135deg, #6b4e0f 0%, #b8960b 30%, #d4af37 50%, #b8960b 70%, #6b4e0f 100%);
-            animation: buttonPulse 2s ease-in-out infinite;
-        }
-
-        .controls-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 18px;
-            flex-wrap: wrap;
-        }
-
-        .volume-control {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: #93a0b8;
-            font-size: 0.95em;
-        }
-
-        .volume-control input[type="range"] {
-            width: 140px;
-            accent-color: #d4af37;
+            display: none;
         }
 
         .continuous-toggle {
@@ -673,16 +706,14 @@
         }
 
         footer {
-            margin-top: 60px;
-            color: #8a93a6;
-            font-size: 1.2em;
-            line-height: 2;
-            padding: 30px;
-            border-top: 1px solid rgba(212, 175, 55, 0.15);
+            margin-top: 30px;
+            padding: 25px;
+            text-align: center;
+            border-top: 1px solid rgba(80, 100, 140, 0.15);
         }
 
         footer p {
-            margin: 10px 0;
+            margin: 5px 0;
             font-style: italic;
         }
 
@@ -692,8 +723,10 @@
             h2 { font-size: 1.4em; }
             .spiritual-symbol { width: 90px; height: 90px; }
             .globe-container { height: 420px; }
-            .world-section, .audio-controls { padding: 20px; }
-            .play-button { padding: 14px 26px; font-size: 1.05em; }
+            .world-section { padding: 20px; }
+            .globe-header { flex-direction: column; text-align: center; }
+            .globe-header-right { justify-content: center; }
+            .compact-toggle .toggle-label { display: none; }
             .volume-control input[type="range"] { width: 110px; }
         }
     </style>
@@ -728,8 +761,30 @@
         </div>
 
         <div class="world-section">
-            <div class="map-title">Clicca sul mondo per ascoltare il canto</div>
-            <div class="map-subtitle">Il globo ruota — trascinalo per esplorare — clicca su una zona linguistica</div>
+            <div class="globe-header">
+                <div class="globe-header-left">
+                    <div class="map-title">Clicca sul mondo per ascoltare il canto</div>
+                    <div class="map-subtitle">Trascina per esplorare • clicca su una zona linguistica</div>
+                </div>
+                <div class="globe-header-right">
+                    <div class="language-display">
+                        <span class="lang-label">Lingua:</span>
+                        <span class="lang-name" id="selectedLanguageName">Latina</span>
+                    </div>
+                    <button id="playButton" class="compact-play-btn" title="Play / Pausa">▶</button>
+                    <div class="compact-volume">
+                        <span>🔊</span>
+                        <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.8" />
+                    </div>
+                    <div class="compact-toggle">
+                        <span class="toggle-switch">
+                            <input type="checkbox" id="continuousToggle">
+                            <span class="toggle-slider"></span>
+                        </span>
+                        <span class="toggle-label">Viaggio continuo</span>
+                    </div>
+                </div>
+            </div>
             <div class="globe-container" id="globeContainer">
                 <div class="tooltip" id="tooltip"></div>
                 <button class="fullscreen-btn" id="fullscreenBtn" title="Modalità immersiva">
@@ -738,42 +793,17 @@
                     </svg>
                 </button>
             </div>
-            <div class="selected-language-info">
-                <div class="label">Lingua selezionata</div>
-                <div class="language-name" id="selectedLanguageName">Latina / Latina</div>
-            </div>
-        </div>
-
-        <div class="audio-controls">
-            <div class="current-language" id="currentLanguage">Latina / Latina</div>
-            <div class="instructions">Un solo player. Nessun autoplay: parte solo con click.</div>
-            <div class="controls-row">
-                <button id="playButton" class="play-button">▶ Audi Canticum</button>
-                <label class="volume-control">
-                    Volume
-                    <input id="volumeSlider" type="range" min="0" max="1" step="0.01" value="0.8" />
-                </label>
+            <div class="continuous-info" id="continuousInfo">
+                <span id="continuousStatus">In attesa...</span>
             </div>
             <audio id="audioPlayer" preload="none">
                 <source id="audioSource" src="Franciscus-de-Caelo-LT.mp3" type="audio/mpeg">
             </audio>
-            <div class="continuous-toggle">
-                <label>
-                    <span class="toggle-switch">
-                        <input type="checkbox" id="continuousToggle">
-                        <span class="toggle-slider"></span>
-                    </span>
-                    Modalità continua — viaggia intorno al mondo
-                </label>
-            </div>
-            <div class="continuous-info" id="continuousInfo">
-                <span id="continuousStatus">In attesa...</span>
-            </div>
         </div>
 
         <footer>
-            <p>Requiescat in Pace</p>
-            <p>Lux perpetua luceat ei</p>
+            <p style="font-size: 0.95em; color: #6a7385; letter-spacing: 1px;">Canticum Francisci de Caelo</p>
+            <p style="font-size: 0.85em; color: #555d6e; margin-top: 8px;">Ad memoriam Summi Pontificis Francisci dedicatum</p>
         </footer>
     </div>
 
@@ -811,7 +841,7 @@
         const playButton = document.getElementById('playButton');
         const audioPlayer = document.getElementById('audioPlayer');
         const audioSource = document.getElementById('audioSource');
-        const currentLanguageEl = document.getElementById('currentLanguage');
+        // currentLanguageEl removed - using compact header display
         const selectedLanguageName = document.getElementById('selectedLanguageName');
         const volumeSlider = document.getElementById('volumeSlider');
 
@@ -1629,10 +1659,8 @@
 
         function updateUI(langKey) {
             const lang = LANGUAGES[langKey];
-            const label = `${lang.latin} / ${lang.native}`;
-            currentLanguageEl.textContent = label;
-            selectedLanguageName.textContent = label;
-            fullscreenLanguageName.textContent = label;
+            selectedLanguageName.textContent = lang.native;
+            fullscreenLanguageName.textContent = `${lang.latin} / ${lang.native}`;
         }
 
         function setActiveMarker(point) {
@@ -1682,7 +1710,7 @@
                 await audioPlayer.play();
                 await fadeTo(targetVolume, 200);
                 playButton.classList.add('playing');
-                playButton.textContent = '⏸ Pausa';
+                playButton.textContent = '⏸';
                 isAudioPlaying = true;
                 globeContainer.classList.add('audio-playing');
                 
@@ -1704,7 +1732,7 @@
                 isAudioPlaying = false;
                 globeContainer.classList.remove('audio-playing');
                 playButton.classList.remove('playing');
-                playButton.textContent = '▶ Audi Canticum';
+                playButton.textContent = '▶';
             }
         });
 
@@ -1731,7 +1759,7 @@
                 await fadeTo(0, 200);
                 audioPlayer.pause();
                 playButton.classList.remove('playing');
-                playButton.textContent = '▶ Audi Canticum';
+                playButton.textContent = '▶';
                 isAudioPlaying = false;
                 globeContainer.classList.remove('audio-playing');
                 
