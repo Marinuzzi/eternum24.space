@@ -1,5 +1,7 @@
 # Eternum24 - Backend Minimale
 
+> 📄 **Documentazione sicurezza completa:** [SECURITY.md](../SECURITY.md)
+
 ## Struttura sul Server
 
 ```
