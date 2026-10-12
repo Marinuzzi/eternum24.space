@@ -32,6 +32,7 @@
   #globe canvas { display: block; outline: none; }
   .hint { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; color: var(--muted); font-size: 15px;
           font-style: italic; pointer-events: none; transition: opacity .6s; }
+  .nuvole { position: absolute; top: 6px; right: 16px; color: var(--muted); font-size: 13px; opacity: .8; pointer-events: none; }
   .tip { position: absolute; pointer-events: none; transform: translate(-50%, -140%); background: rgba(10,14,24,.85);
          border: 1px solid rgba(212,175,55,.4); color: var(--ink); padding: 4px 10px; border-radius: 8px; font-size: 15px;
          white-space: nowrap; opacity: 0; transition: opacity .2s; }
@@ -91,6 +92,7 @@
     <div id="globe" aria-label="Mappamondo: tocca una zona per ascoltare il canto nella sua lingua"></div>
     <div class="tip" id="tip"></div>
     <div class="hint" id="hint">Tocca il mondo per ascoltare</div>
+    <div class="nuvole" id="nuvole" title="Nuvole reali dal satellite, ultima mappa mondiale disponibile (ora italiana)"></div>
   </div>
 
   <div class="chips" role="group" aria-label="Lingua">
@@ -126,6 +128,7 @@
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { nuvoleReali, etichettaNuvole } from '/nuvole.js';
 
 const SONGS = {
   EN: { lang: "English", title: "The First Rose", src: "audio/the-first-rose.m4a", lyrics: "testi/the-first-rose.json",
@@ -251,8 +254,8 @@ function shell(r, color, a, b, alpha, side) {
     uniforms: { glowColor: { value: new THREE.Color(color) }, viewVector: { value: new THREE.Vector3() } },
     vertexShader: `uniform vec3 viewVector; varying float intensity;
       void main(){ vec3 n=normalize(normalMatrix*normal); vec3 v=normalize(normalMatrix*viewVector);
-      intensity=pow(${a}-dot(n,v),${b}); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);} `,
-    fragmentShader: `uniform vec3 glowColor; varying float intensity; void main(){ gl_FragColor=vec4(glowColor*intensity,intensity*${alpha}); }`,
+      intensity=pow(${a.toFixed(2)}-dot(n,v),${b.toFixed(2)}); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);} `,
+    fragmentShader: `uniform vec3 glowColor; varying float intensity; void main(){ gl_FragColor=vec4(glowColor*intensity,intensity*${alpha.toFixed(2)}); }`,
     side, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }));
 }
 function starfield() {
@@ -300,7 +303,7 @@ function initGlobe() {
   tl.load("/textures/earth_night.jpg", t => { mat.emissiveMap = t; mat.emissive = new THREE.Color(0xffffff); mat.emissiveIntensity = 1.2; mat.needsUpdate = true; });
   const cmat = new THREE.MeshBasicMaterial({ transparent: true, opacity: .45, depthWrite: false, blending: THREE.AdditiveBlending });
   clouds = new THREE.Mesh(new THREE.SphereGeometry(1.565, 64, 64), cmat); clouds.visible = false; globe.add(clouds);
-  tl.load("https://clouds.matteason.co.uk/images/2048x1024/clouds-alpha.png", t => { cmat.map = t; cmat.alphaMap = t; cmat.needsUpdate = true; clouds.visible = true; });
+  nuvoleReali(THREE, cmat, { onUpdate: info => { clouds.visible = true; $("nuvole").textContent = etichettaNuvole(info); } });
 
   scene.add(shell(1.58, 0x4a90d9, .7, 2.0, .4, THREE.FrontSide));
   scene.add(shell(1.75, 0x3a7bd5, .6, 1.5, .25, THREE.BackSide));
@@ -364,7 +367,6 @@ function initGlobe() {
     }
     controls.update();
     stars.rotation.y += d * .02;
-    if (clouds.visible) clouds.rotation.y += d * .01;
     scene.children.forEach(c => { if (c.material?.uniforms?.viewVector) c.material.uniforms.viewVector.value = camera.position.clone(); });
     for (const { dot, ring } of Object.values(markers)) {
       dot.scale.setScalar(dot.userData.base * (1 + Math.sin(time * 2 + dot.userData.ph) * .06));

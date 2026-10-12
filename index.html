@@ -937,6 +937,7 @@
             </div>
             <div class="globe-container" id="globeContainer">
                 <div class="tooltip" id="tooltip"></div>
+                <div id="nuvoleInfo" title="Nuvole reali dal satellite, ultima mappa mondiale disponibile (ora italiana)" style="position:absolute; top:10px; left:14px; z-index:5; color:#6a7385; font-size:13px; pointer-events:none;"></div>
                 <button class="fullscreen-btn" id="fullscreenBtn" title="Modalità immersiva">
                     <svg viewBox="0 0 24 24">
                         <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -985,6 +986,7 @@
     <script type="module">
       import * as THREE from 'three';
       import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+      import { nuvoleReali, etichettaNuvole } from '/nuvole.js';
       
       
    
@@ -1881,20 +1883,8 @@
             clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
             globe.add(clouds); // Add to globe so it rotates with Earth
             
-            // Load real-time cloud texture
-            textureLoader.load(
-                'https://clouds.matteason.co.uk/images/2048x1024/clouds-alpha.png',
-                (tex) => {
-                    cloudMaterial.map = tex;
-                    cloudMaterial.alphaMap = tex;
-                    cloudMaterial.needsUpdate = true;
-                    console.log('☁️ Real-time clouds loaded');
-                },
-                undefined,
-                (err) => {
-                    console.warn('Cloud texture failed to load, continuing without clouds');
-                }
-            );
+            // Nuvole reali (EUMETSAT, ogni 3 ore, controllo ogni 30 minuti; riserva matteason)
+            nuvoleReali(THREE, cloudMaterial, { onUpdate: info => { const el = document.getElementById('nuvoleInfo'); if (el) el.textContent = etichettaNuvole(info); } });
 
             // Enhanced atmosphere with shader glow
             const innerGlow = createAtmosphereGlow();
@@ -2077,10 +2067,6 @@
                     stars.rotation.y += delta * 0.02;
                 }
                 
-                // Rotate clouds slightly relative to earth (weather patterns drift)
-                if (clouds && clouds.visible) {
-                    clouds.rotation.y += delta * 0.01; // Slow drift relative to globe
-                }
                 
                 // Update atmosphere glow view vector
                 scene.children.forEach(child => {
