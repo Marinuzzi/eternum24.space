@@ -4,64 +4,79 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>La prima rosa</title>
-<meta name="description" content="La prima rosa — The First Rose · La primera rosa · Rosa prima: un canto sacro in inglese, spagnolo e latino.">
+<meta name="description" content="La prima rosa — The First Rose · La primera rosa · Rosa prima: un canto sacro in inglese, spagnolo e latino, intorno al mondo.">
 <meta name="robots" content="index, follow">
+<meta name="theme-color" content="#05060b">
 <meta property="og:title" content="La prima rosa">
-<meta property="og:description" content="Tre canti in tre lingue: inglese, spagnolo, latino.">
+<meta property="og:description" content="Un canto sacro in tre lingue: inglese per il Nord America, spagnolo per il Sud America, latino per il resto del mondo, con il cuore a Roma.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f7f3ea; --paper: #fffdf8; --ink: #2b2620; --muted: #7a7064; --line: #e6dfd0;
-    --blue: #23395b; --gold: #a8843a; --glow: rgba(168,132,58,.14);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #0f1522; --paper: #161e2e; --ink: #ece6d8; --muted: #a39b8d; --line: #263147;
-            --blue: #9fb6dc; --gold: #d2b26b; --glow: rgba(210,178,107,.12); }
-  }
+  :root { --ink: #ece6d8; --muted: #9a9384; --line: rgba(120,140,180,.18); --gold: #d4af37; --gold2: #f4d03f;
+          --blue: #b9cbe8; --panel: rgba(14,20,34,.72); }
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
-  body { margin: 0; background: var(--bg); color: var(--ink);
-         font: 400 19px/1.55 "Cormorant Garamond", Georgia, serif; }
-  main { max-width: 720px; margin: 0 auto; padding: max(28px, env(safe-area-inset-top)) 18px 56px; }
-  header { text-align: center; padding: 20px 0 8px; }
-  .cross { color: var(--gold); font-size: 22px; letter-spacing: .4em; }
-  h1 { font: 600 clamp(30px, 8vw, 46px)/1.15 "Cinzel", serif; color: var(--blue); margin: 14px 0 10px; letter-spacing: .04em; }
+  body { margin: 0; min-height: 100vh; color: var(--ink); background: radial-gradient(circle at top, #0b0f1b 0%, #05060b 70%) fixed;
+         background-color: #05060b; font: 400 19px/1.55 "Cormorant Garamond", Georgia, serif; overflow-x: hidden; }
+  main { max-width: 760px; margin: 0 auto; padding: max(22px, env(safe-area-inset-top)) 16px 48px; }
+  header { text-align: center; padding: 12px 0 0; }
+  .cross { color: var(--gold); font-size: 20px; }
+  h1 { font: 600 clamp(30px, 8vw, 46px)/1.15 "Cinzel", serif; color: var(--ink); margin: 10px 0 6px; letter-spacing: .06em;
+       text-shadow: 0 0 30px rgba(212,175,55,.25); }
   .langs { font-style: italic; color: var(--muted); font-size: 17px; }
   .langs span { white-space: nowrap; }
-  .epigraph { margin: 26px auto 8px; max-width: 30em; text-align: center; font-style: italic; color: var(--ink); }
-  .epigraph::before, .epigraph::after { content: ""; display: block; width: 46px; height: 1px; background: var(--gold); margin: 14px auto; opacity: .7; }
-  .song { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 20px 18px 14px; margin: 22px 0;
-          box-shadow: 0 1px 0 var(--line); transition: box-shadow .4s ease; }
-  .song.playing { box-shadow: 0 0 0 1px var(--gold), 0 10px 40px var(--glow); }
-  .song-head { display: flex; align-items: center; gap: 16px; }
-  .play { flex: 0 0 auto; width: 60px; height: 60px; border-radius: 50%; border: 1.5px solid var(--gold);
-          background: transparent; color: var(--blue); cursor: pointer; display: grid; place-items: center; -webkit-tap-highlight-color: transparent; }
-  .play:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+  .globe-wrap { position: relative; margin: 8px -16px 0; }
+  #globe { height: min(62vh, 560px); min-height: 340px; width: 100%; cursor: grab; }
+  #globe canvas { display: block; outline: none; }
+  .hint { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; color: var(--muted); font-size: 15px;
+          font-style: italic; pointer-events: none; transition: opacity .6s; }
+  .tip { position: absolute; pointer-events: none; transform: translate(-50%, -140%); background: rgba(10,14,24,.85);
+         border: 1px solid rgba(212,175,55,.4); color: var(--ink); padding: 4px 10px; border-radius: 8px; font-size: 15px;
+         white-space: nowrap; opacity: 0; transition: opacity .2s; }
+  .tip.on { opacity: 1; }
+
+  .chips { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 6px 0 14px; }
+  .chip { font: 400 12px/1 "Cinzel", serif; letter-spacing: .14em; text-transform: uppercase; color: var(--blue);
+          background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 10px 14px; cursor: pointer;
+          -webkit-tap-highlight-color: transparent; transition: border-color .3s, color .3s, background .3s; }
+  .chip small { display: block; font: italic 400 14px/1.2 "Cormorant Garamond", serif; letter-spacing: 0; text-transform: none;
+                color: var(--muted); margin-top: 4px; }
+  .chip.on { border-color: var(--gold); color: var(--gold2); background: rgba(212,175,55,.08); }
+  .chip:focus-visible, .play:focus-visible { outline: 2px solid var(--gold2); outline-offset: 3px; }
+
+  .player { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px 16px 12px;
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .player.playing { border-color: rgba(212,175,55,.5); box-shadow: 0 10px 50px rgba(212,175,55,.08); }
+  .head { display: flex; align-items: center; gap: 16px; }
+  .play { flex: 0 0 auto; width: 58px; height: 58px; border-radius: 50%; border: 1.5px solid var(--gold); background: transparent;
+          color: var(--gold2); cursor: pointer; display: grid; place-items: center; -webkit-tap-highlight-color: transparent; }
   .play svg { width: 24px; height: 24px; fill: currentColor; }
-  .song.playing .play { background: var(--gold); color: var(--paper); }
+  .player.playing .play { background: var(--gold); color: #0b0f1b; }
   .lang { font: 400 12px/1 "Cinzel", serif; letter-spacing: .18em; color: var(--gold); text-transform: uppercase; }
-  .title { font: 600 23px/1.2 "Cormorant Garamond", serif; color: var(--blue); margin-top: 6px; }
-  .bar { display: flex; align-items: center; gap: 10px; margin: 16px 0 4px; font: 400 14px/1 "Cormorant Garamond", serif; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .title { font: 600 23px/1.2 "Cormorant Garamond", serif; color: var(--ink); margin-top: 6px; }
+  .bar { display: flex; align-items: center; gap: 10px; margin: 14px 0 2px; font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
   .bar input { flex: 1; accent-color: var(--gold); height: 28px; }
-  .lyrics { text-align: center; min-height: 6.6em; margin: 10px 0 2px; display: flex; flex-direction: column; justify-content: center; }
+  .lyrics { text-align: center; min-height: 6.8em; margin: 8px 0 0; display: flex; flex-direction: column; justify-content: center; }
   .lyrics .sec { font: 400 11px/1.6 "Cinzel", serif; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); min-height: 1.6em; }
-  .lyrics .prev, .lyrics .next { color: var(--muted); opacity: .55; font-size: 17px; min-height: 1.5em; transition: opacity .4s; }
-  .lyrics .now { font-size: 22px; font-weight: 500; min-height: 1.5em; transition: opacity .4s; }
-  .lyrics.idle .now { color: var(--muted); font-style: italic; font-size: 18px; font-weight: 400; }
-  details { margin-top: 8px; border-top: 1px solid var(--line); padding-top: 8px; }
+  .lyrics .prev, .lyrics .next { color: var(--muted); opacity: .6; font-size: 17px; min-height: 1.5em; }
+  .lyrics .now { font-size: 23px; font-weight: 500; min-height: 1.5em; color: #fff8e6; text-shadow: 0 0 18px rgba(244,208,63,.18); }
+  .lyrics.idle .now { color: var(--muted); font-style: italic; font-size: 18px; font-weight: 400; text-shadow: none; }
+  details { margin-top: 8px; border-top: 1px solid var(--line); padding-top: 6px; }
   summary { cursor: pointer; color: var(--muted); font-style: italic; font-size: 16px; list-style: none; text-align: center; padding: 6px; }
   summary::-webkit-details-marker { display: none; }
   .full { text-align: center; padding: 6px 0 4px; }
   .full p { margin: 0; }
   .full .s { font: 400 11px/1 "Cinzel", serif; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); margin: 18px 0 6px; }
-  .full .cur { color: var(--blue); font-weight: 600; }
-  footer { text-align: center; color: var(--muted); font-size: 16px; margin-top: 40px; }
-  footer a { color: var(--muted); }
+  .full .cur { color: var(--gold2); }
+
+  .epigraph { margin: 30px auto 0; max-width: 30em; text-align: center; font-style: italic; color: var(--ink); opacity: .85; }
+  .epigraph::before { content: ""; display: block; width: 46px; height: 1px; background: var(--gold); margin: 0 auto 14px; opacity: .6; }
+  footer { text-align: center; color: var(--muted); font-size: 16px; margin-top: 34px; }
   footer p { margin: 4px 0; }
   footer .ai { font-size: 15px; font-style: italic; }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  footer a { color: #b89a5e; text-decoration: none; letter-spacing: .04em; }
 </style>
 </head>
 <body>
@@ -72,9 +87,30 @@
     <div class="langs"><span>The First Rose</span> · <span>La primera rosa</span> · <span>Rosa prima</span></div>
   </header>
 
-  <p class="epigraph">Mother, remain in love.<br>Church, remain in truth.<br>What was, was. Let what is, be.</p>
+  <div class="globe-wrap">
+    <div id="globe" aria-label="Mappamondo: tocca una zona per ascoltare il canto nella sua lingua"></div>
+    <div class="tip" id="tip"></div>
+    <div class="hint" id="hint">Tocca il mondo per ascoltare</div>
+  </div>
 
-  <div id="songs"></div>
+  <div class="chips" role="group" aria-label="Lingua">
+    <button class="chip" data-k="EN">English<small>Nord America</small></button>
+    <button class="chip" data-k="ES">Español<small>Sud America</small></button>
+    <button class="chip on" data-k="LA">Latine<small>Roma e il mondo</small></button>
+  </div>
+
+  <section class="player" id="player">
+    <div class="head">
+      <button class="play" id="play" aria-label="Ascolta"></button>
+      <div><div class="lang" id="lang"></div><div class="title" id="title"></div></div>
+    </div>
+    <div class="bar"><span id="cur">0:00</span><input id="range" type="range" min="0" max="100" step="0.1" value="0" aria-label="Posizione"><span id="dur">–:––</span></div>
+    <div class="lyrics idle" id="lyrics" aria-live="off"><div class="sec"></div><div class="prev"></div><div class="now"></div><div class="next"></div></div>
+    <details><summary>Testo completo</summary><div class="full" id="full"></div></details>
+    <audio id="audio" preload="metadata"></audio>
+  </section>
+
+  <p class="epigraph">Mater, mane in amore.<br>Ecclesia, mane in veritate.<br>Quod fuit, fuit. Quod est, sit.</p>
 
   <footer>
     <p>Testi di Francesco Marinuzzi · Roma, ottobre 2026</p>
@@ -83,85 +119,276 @@
   </footer>
 </main>
 
-<script>
-const SONGS = [
-  { lang: "English", title: "The First Rose", src: "audio/the-first-rose.m4a", lyrics: "testi/the-first-rose.json", idle: "Press play to listen" },
-  { lang: "Español", title: "La primera rosa", src: "audio/la-primera-rosa.m4a", lyrics: "testi/la-primera-rosa.json", idle: "Pulse para escuchar" },
-  { lang: "Latine", title: "Rosa prima", src: "audio/rosa-prima.m4a", lyrics: "testi/rosa-prima.json", idle: "Preme ut audias" },
-];
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+               "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const SONGS = {
+  EN: { lang: "English", title: "The First Rose", src: "audio/the-first-rose.m4a", lyrics: "testi/the-first-rose.json",
+        idle: "Press play to listen", region: "North America", at: { lat: 40, lon: -98 } },
+  ES: { lang: "Español", title: "La primera rosa", src: "audio/la-primera-rosa.m4a", lyrics: "testi/la-primera-rosa.json",
+        idle: "Pulse para escuchar", region: "América del Sur", at: { lat: -15, lon: -60 } },
+  LA: { lang: "Latine", title: "Rosa prima", src: "audio/rosa-prima.m4a", lyrics: "testi/rosa-prima.json",
+        idle: "Preme ut audias", region: "Roma et orbis", at: { lat: 41.9, lon: 12.5 } },
+};
+const ORDER = ["EN", "ES", "LA"];
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// Zone: Messico, America centrale e meridionale, Caraibi → spagnolo; USA, Canada, Alaska, Groenlandia → inglese; il resto → latino
+function zoneFor(lat, lon) {
+  if (lon >= -120 && lon <= -30 && lat >= -60 && lat <= 32.5 && !(lat > 25 && lon > -97)) {
+    if (lat <= 13 || lon <= -77 || (lat <= 23 && lon <= -60)) return "ES";
+  }
+  if (lat >= 24 && lon >= -170 && lon <= -25 && !(lat < 60 && lon > -50)) return "EN";
+  if (lat >= 50 && lon <= -130) return "EN";
+  return "LA";
+}
+
+const $ = id => document.getElementById(id);
+const audio = $("audio"), playBtn = $("play"), range = $("range"), box = $("lyrics"), full = $("full"), player = $("player");
 const ICON_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';
 const ICON_PAUSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>';
 const fmt = s => isFinite(s) ? Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0") : "0:00";
-const players = [];
+const cache = {};
+let current = null, cues = [], lines = [], fullEls = [], lastIdx = -2, dragging = false;
 
-SONGS.forEach((song, i) => {
-  const el = document.createElement("section");
-  el.className = "song";
-  el.innerHTML = `
-    <div class="song-head">
-      <button class="play" aria-label="Play ${song.title}">${ICON_PLAY}</button>
-      <div><div class="lang">${song.lang}</div><div class="title">${song.title}</div></div>
-    </div>
-    <div class="bar"><span class="cur">0:00</span><input type="range" min="0" max="100" step="0.1" value="0" aria-label="Posizione"><span class="dur">–:––</span></div>
-    <div class="lyrics idle" aria-live="off"><div class="sec"></div><div class="prev"></div><div class="now">${song.idle}</div><div class="next"></div></div>
-    <details><summary>Testo completo</summary><div class="full"></div></details>
-    <audio preload="metadata" src="${song.src}"></audio>`;
-  document.getElementById("songs").appendChild(el);
+function loadLyrics(k) {
+  if (!cache[k]) cache[k] = fetch(SONGS[k].lyrics).then(r => r.json()).catch(() => []);
+  return cache[k];
+}
 
-  const audio = el.querySelector("audio"), btn = el.querySelector(".play"), range = el.querySelector("input"),
-        cur = el.querySelector(".cur"), dur = el.querySelector(".dur"), box = el.querySelector(".lyrics"),
-        full = el.querySelector(".full");
-  let cues = [], lines = [], fullEls = [], lastIdx = -2;
-  players.push(audio);
-
-  fetch(song.lyrics).then(r => r.json()).then(data => {
-    cues = data;
-    lines = data.filter(c => c.l);
-    full.innerHTML = data.map(c => c.s ? `<p class="s">${c.s}</p>` : `<p>${c.l}</p>`).join("");
-    fullEls = [...full.querySelectorAll("p:not(.s)")];
-  }).catch(() => {});
-
-  function render(t) {
-    if (!lines.length) return;
-    let idx = -1;
-    for (let k = 0; k < lines.length; k++) { if (lines[k].t <= t + 0.15) idx = k; else break; }
-    if (idx === lastIdx) return;
-    lastIdx = idx;
-    let sec = "";
-    for (const c of cues) { if (c.t > t + 0.15) break; if (c.s) sec = c.s; }
-    box.classList.remove("idle");
-    box.querySelector(".sec").textContent = sec;
-    box.querySelector(".prev").textContent = idx > 0 ? lines[idx - 1].l : "";
-    box.querySelector(".now").textContent = idx >= 0 ? lines[idx].l : "";
-    box.querySelector(".next").textContent = lines[idx + 1] ? lines[idx + 1].l : "";
-    fullEls.forEach((p, k) => p.classList.toggle("cur", k === idx));
+async function select(k, autoplay) {
+  const changed = k !== current;
+  current = k;
+  const s = SONGS[k];
+  document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.k === k));
+  $("lang").textContent = s.lang; $("title").textContent = s.title;
+  flyTo(s.at.lat, s.at.lon); setActive(k);
+  if (changed) {
+    audio.src = s.src; range.value = 0; $("cur").textContent = "0:00"; $("dur").textContent = "–:––";
+    box.classList.add("idle"); box.querySelector(".now").textContent = s.idle;
+    ["sec", "prev", "next"].forEach(c => box.querySelector("." + c).textContent = "");
   }
+  if (autoplay) audio.play().catch(() => {});
+  if (changed) {
+    const data = await loadLyrics(k); if (current !== k) return;
+    cues = data; lines = cues.filter(c => c.l); lastIdx = -2;
+    full.innerHTML = cues.map(c => c.s ? `<p class="s">${c.s}</p>` : `<p>${c.l}</p>`).join("");
+    fullEls = [...full.querySelectorAll("p:not(.s)")];
+  }
+}
 
-  btn.addEventListener("click", () => {
-    if (audio.paused) { players.forEach(p => { if (p !== audio) p.pause(); }); audio.play(); }
-    else audio.pause();
-  });
-  audio.addEventListener("play", () => {
-    el.classList.add("playing"); btn.innerHTML = ICON_PAUSE; btn.setAttribute("aria-label", "Pausa");
-    if ("mediaSession" in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({ title: song.title, artist: "La prima rosa", album: song.lang });
-    }
-  });
-  audio.addEventListener("pause", () => { el.classList.remove("playing"); btn.innerHTML = ICON_PLAY; btn.setAttribute("aria-label", "Play " + song.title); });
-  audio.addEventListener("loadedmetadata", () => { dur.textContent = fmt(audio.duration); });
-  audio.addEventListener("timeupdate", () => {
-    if (!dragging) range.value = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
-    cur.textContent = fmt(audio.currentTime);
-    render(audio.currentTime);
-  });
-  audio.addEventListener("ended", () => {        // alla fine passa alla lingua successiva
-    const nxt = players[i + 1];
-    if (nxt) { nxt.currentTime = 0; nxt.play(); nxt.closest(".song").scrollIntoView({ behavior: "smooth", block: "center" }); }
-  });
-  let dragging = false;
-  range.addEventListener("input", () => { dragging = true; cur.textContent = fmt((range.value / 100) * (audio.duration || 0)); });
-  range.addEventListener("change", () => { if (audio.duration) audio.currentTime = (range.value / 100) * audio.duration; dragging = false; lastIdx = -2; render(audio.currentTime); });
+function render(t) {
+  if (!lines.length) return;
+  let idx = -1;
+  for (let i = 0; i < lines.length; i++) { if (lines[i].t <= t + 0.15) idx = i; else break; }
+  if (idx === lastIdx) return;
+  lastIdx = idx;
+  let sec = "";
+  for (const c of cues) { if (c.t > t + 0.15) break; if (c.s) sec = c.s; }
+  box.classList.remove("idle");
+  box.querySelector(".sec").textContent = sec;
+  box.querySelector(".prev").textContent = idx > 0 ? lines[idx - 1].l : "";
+  box.querySelector(".now").textContent = idx >= 0 ? lines[idx].l : "";
+  box.querySelector(".next").textContent = lines[idx + 1] ? lines[idx + 1].l : "";
+  fullEls.forEach((p, i) => p.classList.toggle("cur", i === idx));
+}
+
+playBtn.innerHTML = ICON_PLAY;
+playBtn.addEventListener("click", () => { audio.paused ? audio.play().catch(() => {}) : audio.pause(); });
+document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => select(c.dataset.k, true)));
+audio.addEventListener("play", () => {
+  player.classList.add("playing"); playBtn.innerHTML = ICON_PAUSE; playBtn.setAttribute("aria-label", "Pausa");
+  $("hint").style.opacity = 0;
+  if ("mediaSession" in navigator) navigator.mediaSession.metadata =
+    new MediaMetadata({ title: SONGS[current].title, artist: "La prima rosa", album: SONGS[current].lang });
 });
+audio.addEventListener("pause", () => { player.classList.remove("playing"); playBtn.innerHTML = ICON_PLAY; playBtn.setAttribute("aria-label", "Ascolta"); });
+audio.addEventListener("loadedmetadata", () => { $("dur").textContent = fmt(audio.duration); });
+audio.addEventListener("timeupdate", () => {
+  if (!dragging) range.value = audio.duration ? audio.currentTime / audio.duration * 100 : 0;
+  $("cur").textContent = fmt(audio.currentTime);
+  render(audio.currentTime);
+});
+audio.addEventListener("ended", () => {            // il viaggio prosegue: Nord, Sud, poi Roma
+  const i = ORDER.indexOf(current);
+  if (i < ORDER.length - 1) select(ORDER[i + 1], true);
+});
+range.addEventListener("input", () => { dragging = true; $("cur").textContent = fmt(range.value / 100 * (audio.duration || 0)); });
+range.addEventListener("change", () => { if (audio.duration) audio.currentTime = range.value / 100 * audio.duration; dragging = false; lastIdx = -2; render(audio.currentTime); });
+
+// ---------- Mappamondo (la stessa terra notturna di eternum24.space) ----------
+const el = $("globe"), tip = $("tip");
+let scene, camera, renderer, globe, controls, clouds, stars, flight = null;
+const markers = {}, particles = [];
+
+function v3(lat, lon, r) {
+  const phi = (90 - lat) * Math.PI / 180, th = (lon + 180) * Math.PI / 180;
+  return new THREE.Vector3(-r * Math.sin(phi) * Math.cos(th), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(th));
+}
+function latlon(v) {
+  v = v.clone().normalize();
+  let lon = THREE.MathUtils.radToDeg(Math.atan2(v.z, -v.x)) - 180;
+  while (lon < -180) lon += 360; while (lon > 180) lon -= 360;
+  return [90 - THREE.MathUtils.radToDeg(Math.acos(v.y)), lon];
+}
+function glow(hex, scale) {
+  const c = document.createElement("canvas"); c.width = c.height = 128;
+  const g = c.getContext("2d"), col = new THREE.Color(hex), rgb = `${col.r * 255},${col.g * 255},${col.b * 255}`;
+  const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, `rgba(${rgb},.95)`); gr.addColorStop(.45, `rgba(${rgb},.4)`); gr.addColorStop(1, "rgba(0,0,0,0)");
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
+  s.scale.setScalar(scale); s.userData.base = scale; s.userData.ph = Math.random() * 6.28;
+  return s;
+}
+function shell(r, color, a, b, alpha, side) {
+  return new THREE.Mesh(new THREE.SphereGeometry(r, 64, 64), new THREE.ShaderMaterial({
+    uniforms: { glowColor: { value: new THREE.Color(color) }, viewVector: { value: new THREE.Vector3() } },
+    vertexShader: `uniform vec3 viewVector; varying float intensity;
+      void main(){ vec3 n=normalize(normalMatrix*normal); vec3 v=normalize(normalMatrix*viewVector);
+      intensity=pow(${a}-dot(n,v),${b}); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);} `,
+    fragmentShader: `uniform vec3 glowColor; varying float intensity; void main(){ gl_FragColor=vec4(glowColor*intensity,intensity*${alpha}); }`,
+    side, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }));
+}
+function starfield() {
+  const n = 1400, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const r = 5 + Math.random() * 8, t = Math.random() * 6.283, p = Math.acos(2 * Math.random() - 1);
+    pos.set([r * Math.sin(p) * Math.cos(t), r * Math.sin(p) * Math.sin(t), r * Math.cos(p)], i * 3);
+  }
+  const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  const c = document.createElement("canvas"); c.width = c.height = 64; const g = c.getContext("2d");
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(.3, "rgba(200,220,255,.5)"); gr.addColorStop(1, "rgba(100,150,255,0)");
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  return new THREE.Points(geo, new THREE.PointsMaterial({ map: new THREE.CanvasTexture(c), size: .22, transparent: true,
+    depthWrite: false, blending: THREE.AdditiveBlending }));
+}
+
+function setActive(k) {
+  Object.entries(markers).forEach(([key, m]) => { m.dot.userData.base = key === k ? .2 : .12; m.ring.visible = key === k; });
+}
+function flyTo(lat, lon) {
+  if (!camera) return;
+  flight = { from: camera.position.clone().normalize(), to: v3(lat + 8, lon, 1).normalize(), dist: camera.position.length(), t: 0 };
+  controls.autoRotate = false;
+}
+
+function initGlobe() {
+  const w = el.clientWidth, h = el.clientHeight;
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(45, w / h, .1, 1000);
+  camera.position.copy(v3(SONGS.LA.at.lat + 8, SONGS.LA.at.lon, w < 520 ? 5.4 : 4.6));
+  renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(w, h);
+  el.appendChild(renderer.domElement);
+
+  stars = starfield(); scene.add(stars);
+  scene.add(new THREE.AmbientLight(0x222222, 1.2));
+  const sun = new THREE.PointLight(0xffffff, 1.6); sun.position.set(5, 3, 5); scene.add(sun);
+  const divine = new THREE.PointLight(0xf4d03f, .4); divine.position.set(0, 8, 0); scene.add(divine);
+
+  const mat = new THREE.MeshPhongMaterial({ color: 0x0a1420, shininess: 15 });
+  globe = new THREE.Mesh(new THREE.SphereGeometry(1.55, 64, 64), mat); scene.add(globe);
+  const tl = new THREE.TextureLoader();
+  tl.load("/textures/earth_day.jpg", t => { mat.map = t; mat.needsUpdate = true; });
+  tl.load("/textures/earth_night.jpg", t => { mat.emissiveMap = t; mat.emissive = new THREE.Color(0xffffff); mat.emissiveIntensity = 1.2; mat.needsUpdate = true; });
+  const cmat = new THREE.MeshBasicMaterial({ transparent: true, opacity: .45, depthWrite: false, blending: THREE.AdditiveBlending });
+  clouds = new THREE.Mesh(new THREE.SphereGeometry(1.565, 64, 64), cmat); clouds.visible = false; globe.add(clouds);
+  tl.load("https://clouds.matteason.co.uk/images/2048x1024/clouds-alpha.png", t => { cmat.map = t; cmat.alphaMap = t; cmat.needsUpdate = true; clouds.visible = true; });
+
+  scene.add(shell(1.58, 0x4a90d9, .7, 2.0, .4, THREE.FrontSide));
+  scene.add(shell(1.75, 0x3a7bd5, .6, 1.5, .25, THREE.BackSide));
+
+  for (const [k, s] of Object.entries(SONGS)) {
+    const p = v3(s.at.lat, s.at.lon, 1.575);
+    const dot = glow(k === "LA" ? 0xf4d03f : 0xd4af37, .12); dot.position.copy(p); globe.add(dot);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(.05, .07, 40),
+      new THREE.MeshBasicMaterial({ color: 0xf4d03f, transparent: true, opacity: .75, side: THREE.DoubleSide }));
+    ring.position.copy(p); ring.lookAt(0, 0, 0); ring.visible = false; globe.add(ring);
+    markers[k] = { dot, ring };
+  }
+  const rome = glow(0xfff1c1, .07); rome.position.copy(v3(41.9, 12.5, 1.58)); globe.add(rome);   // Roma: una luce ferma
+
+  controls = new OrbitControls(camera, renderer.domElement);
+  Object.assign(controls, { enableDamping: true, dampingFactor: .07, enablePan: false, minDistance: 3.1, maxDistance: 6,
+    minPolarAngle: .35, maxPolarAngle: 2.6, autoRotate: !REDUCED, autoRotateSpeed: .3 });
+  controls.addEventListener("start", () => { flight = null; });
+
+  const ray = new THREE.Raycaster(), m = new THREE.Vector2();
+  const hit = e => {
+    const r = el.getBoundingClientRect();
+    m.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+    ray.setFromCamera(m, camera);
+    const x = ray.intersectObject(globe)[0];
+    return x ? { k: zoneFor(...latlon(x.point)), x: e.clientX - r.left, y: e.clientY - r.top } : null;
+  };
+  let down = null;
+  el.addEventListener("pointerdown", e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+  el.addEventListener("pointerup", e => {
+    if (!down) return;
+    const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y), quick = performance.now() - down.t < 500;
+    down = null;
+    if (moved > 8 || !quick) return;                 // era un trascinamento
+    const h = hit(e); if (!h) return;
+    if (h.k === current && !audio.paused) return;
+    select(h.k, true);
+  });
+  el.addEventListener("pointermove", e => {
+    if (e.pointerType !== "mouse") return;
+    const h = hit(e);
+    if (!h) { tip.classList.remove("on"); el.style.cursor = "grab"; return; }
+    tip.textContent = `${SONGS[h.k].lang} · ${SONGS[h.k].region}`;
+    tip.style.left = h.x + "px"; tip.style.top = h.y + "px"; tip.classList.add("on"); el.style.cursor = "pointer";
+  });
+  el.addEventListener("pointerleave", () => tip.classList.remove("on"));
+  addEventListener("resize", () => {
+    const w = el.clientWidth, h = el.clientHeight;
+    camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h);
+  });
+
+  const clock = new THREE.Clock(); let time = 0;
+  (function loop() {
+    const d = Math.min(clock.getDelta(), .1); time += d;
+    if (flight) {
+      flight.t = Math.min(1, flight.t + d / 2.2);
+      const e = flight.t < .5 ? 2 * flight.t * flight.t : 1 - Math.pow(-2 * flight.t + 2, 2) / 2;
+      camera.position.copy(flight.from.clone().lerp(flight.to, e).normalize().multiplyScalar(flight.dist));
+      camera.lookAt(0, 0, 0);
+      if (flight.t >= 1) { flight = null; setTimeout(() => { if (!flight) controls.autoRotate = !REDUCED; }, 6000); }
+    }
+    controls.update();
+    stars.rotation.y += d * .02;
+    if (clouds.visible) clouds.rotation.y += d * .01;
+    scene.children.forEach(c => { if (c.material?.uniforms?.viewVector) c.material.uniforms.viewVector.value = camera.position.clone(); });
+    for (const { dot, ring } of Object.values(markers)) {
+      dot.scale.setScalar(dot.userData.base * (1 + Math.sin(time * 2 + dot.userData.ph) * .06));
+      if (ring.visible) ring.rotation.z += d * .5;
+    }
+    if (!audio.paused && !REDUCED && particles.length < 16 && Math.random() < .08) {
+      const at = SONGS[current].at;
+      const p = new THREE.Mesh(new THREE.SphereGeometry(.018, 8, 8), new THREE.MeshBasicMaterial({ color: 0xf4d03f, transparent: true, opacity: .7 }));
+      p.position.copy(v3(at.lat + (Math.random() - .5) * 18, at.lon + (Math.random() - .5) * 24, 1.6));
+      p.userData = { v: p.position.clone().normalize().multiplyScalar(.006 + Math.random() * .004), life: 0, max: 110 + Math.random() * 60 };
+      scene.add(p); particles.push(p);
+    }
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i]; p.position.add(p.userData.v); p.userData.life++;
+      p.material.opacity = .7 * (1 - p.userData.life / p.userData.max);
+      if (p.userData.life >= p.userData.max) { scene.remove(p); p.geometry.dispose(); p.material.dispose(); particles.splice(i, 1); }
+    }
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  })();
+}
+
+try { initGlobe(); } catch (err) { console.warn("Mappamondo non disponibile", err); el.style.display = "none"; $("hint").style.display = "none"; }
+select("LA", false);
 </script>
 </body>
 </html>
