@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>La prima rosa</title>
+<meta name="description" content="La prima rosa — The First Rose · La primera rosa · Rosa prima: un canto sacro in inglese, spagnolo e latino.">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="La prima rosa">
+<meta property="og:description" content="Tre canti in tre lingue: inglese, spagnolo, latino.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f3ea; --paper: #fffdf8; --ink: #2b2620; --muted: #7a7064; --line: #e6dfd0;
+    --blue: #23395b; --gold: #a8843a; --glow: rgba(168,132,58,.14);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1522; --paper: #161e2e; --ink: #ece6d8; --muted: #a39b8d; --line: #263147;
+            --blue: #9fb6dc; --gold: #d2b26b; --glow: rgba(210,178,107,.12); }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 400 19px/1.55 "Cormorant Garamond", Georgia, serif; }
+  main { max-width: 720px; margin: 0 auto; padding: max(28px, env(safe-area-inset-top)) 18px 56px; }
+  header { text-align: center; padding: 20px 0 8px; }
+  .cross { color: var(--gold); font-size: 22px; letter-spacing: .4em; }
+  h1 { font: 600 clamp(30px, 8vw, 46px)/1.15 "Cinzel", serif; color: var(--blue); margin: 14px 0 10px; letter-spacing: .04em; }
+  .langs { font-style: italic; color: var(--muted); font-size: 17px; }
+  .langs span { white-space: nowrap; }
+  .epigraph { margin: 26px auto 8px; max-width: 30em; text-align: center; font-style: italic; color: var(--ink); }
+  .epigraph::before, .epigraph::after { content: ""; display: block; width: 46px; height: 1px; background: var(--gold); margin: 14px auto; opacity: .7; }
+  .song { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 20px 18px 14px; margin: 22px 0;
+          box-shadow: 0 1px 0 var(--line); transition: box-shadow .4s ease; }
+  .song.playing { box-shadow: 0 0 0 1px var(--gold), 0 10px 40px var(--glow); }
+  .song-head { display: flex; align-items: center; gap: 16px; }
+  .play { flex: 0 0 auto; width: 60px; height: 60px; border-radius: 50%; border: 1.5px solid var(--gold);
+          background: transparent; color: var(--blue); cursor: pointer; display: grid; place-items: center; -webkit-tap-highlight-color: transparent; }
+  .play:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+  .play svg { width: 24px; height: 24px; fill: currentColor; }
+  .song.playing .play { background: var(--gold); color: var(--paper); }
+  .lang { font: 400 12px/1 "Cinzel", serif; letter-spacing: .18em; color: var(--gold); text-transform: uppercase; }
+  .title { font: 600 23px/1.2 "Cormorant Garamond", serif; color: var(--blue); margin-top: 6px; }
+  .bar { display: flex; align-items: center; gap: 10px; margin: 16px 0 4px; font: 400 14px/1 "Cormorant Garamond", serif; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .bar input { flex: 1; accent-color: var(--gold); height: 28px; }
+  .lyrics { text-align: center; min-height: 6.6em; margin: 10px 0 2px; display: flex; flex-direction: column; justify-content: center; }
+  .lyrics .sec { font: 400 11px/1.6 "Cinzel", serif; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); min-height: 1.6em; }
+  .lyrics .prev, .lyrics .next { color: var(--muted); opacity: .55; font-size: 17px; min-height: 1.5em; transition: opacity .4s; }
+  .lyrics .now { font-size: 22px; font-weight: 500; min-height: 1.5em; transition: opacity .4s; }
+  .lyrics.idle .now { color: var(--muted); font-style: italic; font-size: 18px; font-weight: 400; }
+  details { margin-top: 8px; border-top: 1px solid var(--line); padding-top: 8px; }
+  summary { cursor: pointer; color: var(--muted); font-style: italic; font-size: 16px; list-style: none; text-align: center; padding: 6px; }
+  summary::-webkit-details-marker { display: none; }
+  .full { text-align: center; padding: 6px 0 4px; }
+  .full p { margin: 0; }
+  .full .s { font: 400 11px/1 "Cinzel", serif; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); margin: 18px 0 6px; }
+  .full .cur { color: var(--blue); font-weight: 600; }
+  footer { text-align: center; color: var(--muted); font-size: 16px; margin-top: 40px; }
+  footer a { color: var(--muted); }
+  footer p { margin: 4px 0; }
+  footer .ai { font-size: 15px; font-style: italic; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="cross" aria-hidden="true">✝</div>
+    <h1>La prima rosa</h1>
+    <div class="langs"><span>The First Rose</span> · <span>La primera rosa</span> · <span>Rosa prima</span></div>
+  </header>
+
+  <p class="epigraph">Mother, remain in love.<br>Church, remain in truth.<br>What was, was. Let what is, be.</p>
+
+  <div id="songs"></div>
+
+  <footer>
+    <p>Testi di Francesco Marinuzzi · Roma, ottobre 2026</p>
+    <p class="ai">Musica e voci realizzate con l'intelligenza artificiale.</p>
+    <p><a href="/canti/">Canti sacri</a></p>
+  </footer>
+</main>
+
+<script>
+const SONGS = [
+  { lang: "English", title: "The First Rose", src: "audio/the-first-rose.m4a", lyrics: "testi/the-first-rose.json", idle: "Press play to listen" },
+  { lang: "Español", title: "La primera rosa", src: "audio/la-primera-rosa.m4a", lyrics: "testi/la-primera-rosa.json", idle: "Pulse para escuchar" },
+  { lang: "Latine", title: "Rosa prima", src: "audio/rosa-prima.m4a", lyrics: "testi/rosa-prima.json", idle: "Preme ut audias" },
+];
+const ICON_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>';
+const fmt = s => isFinite(s) ? Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0") : "0:00";
+const players = [];
+
+SONGS.forEach((song, i) => {
+  const el = document.createElement("section");
+  el.className = "song";
+  el.innerHTML = `
+    <div class="song-head">
+      <button class="play" aria-label="Play ${song.title}">${ICON_PLAY}</button>
+      <div><div class="lang">${song.lang}</div><div class="title">${song.title}</div></div>
+    </div>
+    <div class="bar"><span class="cur">0:00</span><input type="range" min="0" max="100" step="0.1" value="0" aria-label="Posizione"><span class="dur">–:––</span></div>
+    <div class="lyrics idle" aria-live="off"><div class="sec"></div><div class="prev"></div><div class="now">${song.idle}</div><div class="next"></div></div>
+    <details><summary>Testo completo</summary><div class="full"></div></details>
+    <audio preload="metadata" src="${song.src}"></audio>`;
+  document.getElementById("songs").appendChild(el);
+
+  const audio = el.querySelector("audio"), btn = el.querySelector(".play"), range = el.querySelector("input"),
+        cur = el.querySelector(".cur"), dur = el.querySelector(".dur"), box = el.querySelector(".lyrics"),
+        full = el.querySelector(".full");
+  let cues = [], lines = [], fullEls = [], lastIdx = -2;
+  players.push(audio);
+
+  fetch(song.lyrics).then(r => r.json()).then(data => {
+    cues = data;
+    lines = data.filter(c => c.l);
+    full.innerHTML = data.map(c => c.s ? `<p class="s">${c.s}</p>` : `<p>${c.l}</p>`).join("");
+    fullEls = [...full.querySelectorAll("p:not(.s)")];
+  }).catch(() => {});
+
+  function render(t) {
+    if (!lines.length) return;
+    let idx = -1;
+    for (let k = 0; k < lines.length; k++) { if (lines[k].t <= t + 0.15) idx = k; else break; }
+    if (idx === lastIdx) return;
+    lastIdx = idx;
+    let sec = "";
+    for (const c of cues) { if (c.t > t + 0.15) break; if (c.s) sec = c.s; }
+    box.classList.remove("idle");
+    box.querySelector(".sec").textContent = sec;
+    box.querySelector(".prev").textContent = idx > 0 ? lines[idx - 1].l : "";
+    box.querySelector(".now").textContent = idx >= 0 ? lines[idx].l : "";
+    box.querySelector(".next").textContent = lines[idx + 1] ? lines[idx + 1].l : "";
+    fullEls.forEach((p, k) => p.classList.toggle("cur", k === idx));
+  }
+
+  btn.addEventListener("click", () => {
+    if (audio.paused) { players.forEach(p => { if (p !== audio) p.pause(); }); audio.play(); }
+    else audio.pause();
+  });
+  audio.addEventListener("play", () => {
+    el.classList.add("playing"); btn.innerHTML = ICON_PAUSE; btn.setAttribute("aria-label", "Pausa");
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({ title: song.title, artist: "La prima rosa", album: song.lang });
+    }
+  });
+  audio.addEventListener("pause", () => { el.classList.remove("playing"); btn.innerHTML = ICON_PLAY; btn.setAttribute("aria-label", "Play " + song.title); });
+  audio.addEventListener("loadedmetadata", () => { dur.textContent = fmt(audio.duration); });
+  audio.addEventListener("timeupdate", () => {
+    if (!dragging) range.value = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+    cur.textContent = fmt(audio.currentTime);
+    render(audio.currentTime);
+  });
+  audio.addEventListener("ended", () => {        // alla fine passa alla lingua successiva
+    const nxt = players[i + 1];
+    if (nxt) { nxt.currentTime = 0; nxt.play(); nxt.closest(".song").scrollIntoView({ behavior: "smooth", block: "center" }); }
+  });
+  let dragging = false;
+  range.addEventListener("input", () => { dragging = true; cur.textContent = fmt((range.value / 100) * (audio.duration || 0)); });
+  range.addEventListener("change", () => { if (audio.duration) audio.currentTime = (range.value / 100) * audio.duration; dragging = false; lastIdx = -2; render(audio.currentTime); });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Canti sacri</title>
+<meta name="description" content="Canti sacri di Francesco Marinuzzi: In memoriam Papae Francisci e La prima rosa.">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Canti sacri">
+<meta property="og:description" content="In memoriam Papae Francisci · La prima rosa">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #f7f3ea; --paper: #fffdf8; --ink: #2b2620; --muted: #7a7064; --line: #e6dfd0;
+          --blue: #23395b; --gold: #a8843a; --glow: rgba(168,132,58,.14); }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1522; --paper: #161e2e; --ink: #ece6d8; --muted: #a39b8d; --line: #263147;
+            --blue: #9fb6dc; --gold: #d2b26b; --glow: rgba(210,178,107,.12); }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 400 19px/1.55 "Cormorant Garamond", Georgia, serif; }
+  main { max-width: 640px; margin: 0 auto; padding: max(28px, env(safe-area-inset-top)) 18px 56px; }
+  header { text-align: center; padding: 28px 0 6px; }
+  .cross { color: var(--gold); font-size: 22px; }
+  h1 { font: 600 clamp(30px, 8vw, 44px)/1.15 "Cinzel", serif; color: var(--blue); margin: 14px 0 6px; letter-spacing: .05em; }
+  .sub { font-style: italic; color: var(--muted); }
+  .tree { margin: 30px 0 0; position: relative; }
+  .tree::before { content: ""; position: absolute; left: 50%; top: -14px; bottom: 30px; width: 1px; background: var(--gold); opacity: .45; }
+  a.branch { position: relative; display: block; text-decoration: none; color: inherit; background: var(--paper);
+             border: 1px solid var(--line); border-radius: 18px; padding: 22px 20px; margin: 0 0 22px; text-align: center;
+             transition: box-shadow .3s ease, transform .3s ease; }
+  a.branch:hover, a.branch:focus-visible { box-shadow: 0 0 0 1px var(--gold), 0 10px 40px var(--glow); transform: translateY(-1px); outline: none; }
+  .when { font: 400 12px/1 "Cinzel", serif; letter-spacing: .18em; color: var(--gold); text-transform: uppercase; }
+  .name { font: 600 25px/1.2 "Cormorant Garamond", serif; color: var(--blue); margin: 8px 0 6px; }
+  .what { color: var(--muted); font-style: italic; font-size: 17px; }
+  footer { text-align: center; color: var(--muted); font-size: 16px; margin-top: 36px; }
+  footer p { margin: 4px 0; }
+  .ai { font-size: 15px; font-style: italic; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="cross" aria-hidden="true">✝</div>
+    <h1>Canti sacri</h1>
+    <div class="sub">rami di uno stesso albero</div>
+  </header>
+
+  <nav class="tree">
+    <a class="branch" href="/">
+      <div class="when">Primo ramo</div>
+      <div class="name">In memoriam Papae Francisci</div>
+      <div class="what">Canticum Francisci de Caelo · quindici lingue intorno al mondo</div>
+    </a>
+    <a class="branch" href="/la-prima-rosa/">
+      <div class="when">Secondo ramo</div>
+      <div class="name">La prima rosa</div>
+      <div class="what">The First Rose · La primera rosa · Rosa prima</div>
+    </a>
+  </nav>
+
+  <footer>
+    <p>Testi di Francesco Marinuzzi · Roma</p>
+    <p class="ai">Musica e voci realizzate con l'intelligenza artificiale.</p>
+  </footer>
+</main>
+</body>
+</html>
