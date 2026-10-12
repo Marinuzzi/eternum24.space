@@ -975,6 +975,23 @@
     </div>
     <div class="fullscreen-hint" id="fullscreenHint">Clicca sul mondo per cambiare lingua • ESC per uscire</div>
     <div class="tooltip" id="fullscreenTooltip" style="z-index: 10002;"></div>
+    <script>
+    // Play subito, anche prima che arrivi il mappamondo (three.js pesa ~1 MB e da cellulare arriva dopo).
+    // Quando il codice del globo è pronto (window.__eternumPronto) questo gestore si fa da parte.
+    (function () {
+        var btn = document.getElementById('playButton'), a = document.getElementById('audioPlayer');
+        btn.addEventListener('click', function () {
+            if (window.__eternumPronto) return;
+            if (a.paused) {
+                document.getElementById('audioSource').src = 'https://api.eternum24.space/api/audio/Franciscus-de-Caelo-LT.mp3';
+                a.load();
+                a.play().then(function () { btn.classList.add('playing'); btn.textContent = '⏸'; }).catch(function () {});
+            } else {
+                a.pause(); btn.classList.remove('playing'); btn.textContent = '▶';
+            }
+        });
+    })();
+    </script>
     <script type="importmap">
         {
           "imports": {
@@ -2270,6 +2287,8 @@
                 }
             }
         });
+
+        window.__eternumPronto = true; // da qui il play lo gestisce il mappamondo
 
         volumeSlider.addEventListener('input', () => {
             if (!audioPlayer.paused) {
