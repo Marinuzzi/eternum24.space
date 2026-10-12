@@ -121,15 +121,8 @@
   </footer>
 </main>
 
-<script type="importmap">
-{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-               "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
-</script>
-<script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { nuvoleReali, etichettaNuvole } from '/nuvole.js';
-
+<script>
+// Lettore: script normale, parte subito senza aspettare il mappamondo (three.js pesa ~1 MB e da cellulare arriva dopo).
 const SONGS = {
   EN: { lang: "English", title: "The First Rose", src: "audio/the-first-rose.m4a", lyrics: "testi/the-first-rose.json",
         idle: "Press play to listen", region: "North America", at: { lat: 40, lon: -98 } },
@@ -139,7 +132,6 @@ const SONGS = {
         idle: "Preme ut audias", region: "Roma et orbis", at: { lat: 41.9, lon: 12.5 } },
 };
 const ORDER = ["EN", "ES", "LA"];
-const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // Zone: Messico, America centrale e meridionale, Caraibi → spagnolo; USA, Canada, Alaska, Groenlandia → inglese; il resto → latino
 function zoneFor(lat, lon) {
@@ -170,7 +162,7 @@ async function select(k, autoplay) {
   const s = SONGS[k];
   document.querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.k === k));
   $("lang").textContent = s.lang; $("title").textContent = s.title;
-  flyTo(s.at.lat, s.at.lon); setActive(k);
+  window.dispatchEvent(new CustomEvent("canto", { detail: k }));
   if (changed) {
     audio.src = s.src; range.value = 0; $("cur").textContent = "0:00"; $("dur").textContent = "–:––";
     box.classList.add("idle"); box.querySelector(".now").textContent = s.idle;
@@ -223,6 +215,23 @@ audio.addEventListener("ended", () => {            // il viaggio prosegue: Nord,
 });
 range.addEventListener("input", () => { dragging = true; $("cur").textContent = fmt(range.value / 100 * (audio.duration || 0)); });
 range.addEventListener("change", () => { if (audio.duration) audio.currentTime = range.value / 100 * audio.duration; dragging = false; lastIdx = -2; render(audio.currentTime); });
+
+select("LA", false);
+window.PR = { SONGS, ORDER, zoneFor, select, audio, get current() { return current; } };
+</script>
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+               "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { nuvoleReali, etichettaNuvole } from '/nuvole.js';
+
+// Mappamondo: si aggancia al lettore tramite window.PR e l'evento «canto».
+const PR = window.PR, SONGS = PR.SONGS, zoneFor = PR.zoneFor, select = PR.select, audio = PR.audio;
+const $ = id => document.getElementById(id);
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // ---------- Mappamondo (la stessa terra notturna di eternum24.space) ----------
 const el = $("globe"), tip = $("tip");
@@ -339,7 +348,7 @@ function initGlobe() {
     down = null;
     if (moved > 8 || !quick) return;                 // era un trascinamento
     const h = hit(e); if (!h) return;
-    if (h.k === current && !audio.paused) return;
+    if (h.k === PR.current && !audio.paused) return;
     select(h.k, true);
   });
   el.addEventListener("pointermove", e => {
@@ -373,7 +382,7 @@ function initGlobe() {
       if (ring.visible) ring.rotation.z += d * .5;
     }
     if (!audio.paused && !REDUCED && particles.length < 16 && Math.random() < .08) {
-      const at = SONGS[current].at;
+      const at = SONGS[PR.current].at;
       const p = new THREE.Mesh(new THREE.SphereGeometry(.018, 8, 8), new THREE.MeshBasicMaterial({ color: 0xf4d03f, transparent: true, opacity: .7 }));
       p.position.copy(v3(at.lat + (Math.random() - .5) * 18, at.lon + (Math.random() - .5) * 24, 1.6));
       p.userData = { v: p.position.clone().normalize().multiplyScalar(.006 + Math.random() * .004), life: 0, max: 110 + Math.random() * 60 };
@@ -389,8 +398,10 @@ function initGlobe() {
   })();
 }
 
-try { initGlobe(); } catch (err) { console.warn("Mappamondo non disponibile", err); el.style.display = "none"; $("hint").style.display = "none"; }
-select("LA", false);
+try {
+  initGlobe(); setActive(PR.current);
+  window.addEventListener("canto", e => { const s = SONGS[e.detail]; flyTo(s.at.lat, s.at.lon); setActive(e.detail); });
+} catch (err) { console.warn("Mappamondo non disponibile", err); el.style.display = "none"; $("hint").style.display = "none"; }
 </script>
 </body>
 </html>
